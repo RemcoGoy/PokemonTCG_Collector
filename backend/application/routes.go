@@ -17,6 +17,7 @@ func loadRoutes() *chi.Mux {
 	router.Get("/ok", ok)
 
 	router.Route("/orders", loadOrderRoutes)
+	router.Route("/auth", loadAuthRoutes)
 
 	return router
 }
@@ -24,6 +25,12 @@ func loadRoutes() *chi.Mux {
 func ok(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"ok":true}`))
+}
+
+func loadAuthRoutes(router chi.Router) {
+	authHandler := &handler.Auth{}
+
+	router.Post("/login", authHandler.Login)
 }
 
 func loadOrderRoutes(router chi.Router) {
