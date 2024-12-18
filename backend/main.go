@@ -1,20 +1,17 @@
 package main
 
 import (
-	"net/http"
+	"context"
+	"fmt"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"example.com/main/application"
 )
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/ok", ok)
-	http.ListenAndServe(":3000", r)
-}
+	app := application.New()
 
-func ok(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"ok":true}`))
+	err := app.Start(context.TODO())
+	if err != nil {
+		fmt.Println(err)
+	}
 }
