@@ -1,7 +1,6 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,8 +9,6 @@ import (
 	"testing"
 
 	"backend/internal/test"
-
-	"github.com/supabase-community/gotrue-go/types"
 )
 
 func TestSignupHandler(t *testing.T) {
@@ -19,7 +16,7 @@ func TestSignupHandler(t *testing.T) {
 	user_password := "testpwd"
 
 	s := &Server{
-		SupabaseClient: test.NewMockSupabaseClient(&test.MockAuth{}),
+		SupabaseClient: test.NewMockSupabaseClient(),
 	}
 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
 	defer server.Close()
@@ -44,22 +41,12 @@ func TestSignupHandler(t *testing.T) {
 	}
 }
 
-type FailedSignupAuth struct {
-	test.MockAuth
-}
-
-func (m *FailedSignupAuth) Signup(req types.SignupRequest) (*types.SignupResponse, error) {
-	return nil, errors.New("error")
-}
-
 func TestSignupFailedHandler(t *testing.T) {
 	user_email := "remco.goy@hotmail.com"
 	user_password := "testpwd"
 
-	auth := &FailedSignupAuth{}
-
 	s := &Server{
-		SupabaseClient: test.NewMockSupabaseClient(auth),
+		SupabaseClient: test.NewMockSupabaseClient(),
 	}
 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
 	defer server.Close()

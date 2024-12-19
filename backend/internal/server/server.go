@@ -9,7 +9,7 @@ import (
 
 	sb "backend/internal/supabase"
 
-	"github.com/supabase-community/supabase-go"
+	"github.com/nedpals/supabase-go"
 
 	_ "github.com/joho/godotenv/autoload"
 )
