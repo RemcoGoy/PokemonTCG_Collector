@@ -7,20 +7,22 @@ import (
 	"strconv"
 	"time"
 
-	"backend/internal/supabase"
+	sb "backend/internal/supabase"
+
+	"github.com/supabase-community/supabase-go"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type Server struct {
-	SupabaseClient *supabase.SupabaseClient
+	SupabaseClient *supabase.Client
 	port           int
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
-		SupabaseClient: supabase.NewSupabaseClient(),
+		SupabaseClient: sb.NewSupabaseClient(),
 		port:           port,
 	}
 

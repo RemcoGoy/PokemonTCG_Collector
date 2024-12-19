@@ -26,7 +26,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 		resp["error"] = err.Error()
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
-		token, err := s.SupabaseClient.Client.Auth.SignInWithEmailPassword(loginRequest.Email, loginRequest.Password)
+		token, err := s.SupabaseClient.Auth.SignInWithEmailPassword(loginRequest.Email, loginRequest.Password)
 		if err != nil {
 			resp["error"] = err.Error()
 			w.WriteHeader(http.StatusBadRequest)
@@ -55,7 +55,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		resp["error"] = err.Error()
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
-		user, err := s.SupabaseClient.Client.Auth.Signup(types.SignupRequest{
+		user, err := s.SupabaseClient.Auth.Signup(types.SignupRequest{
 			Email:    registerRequest.Email,
 			Password: registerRequest.Password,
 		})

@@ -7,11 +7,7 @@ import (
 	"github.com/supabase-community/supabase-go"
 )
 
-type SupabaseClient struct {
-	Client *supabase.Client
-}
-
-func NewSupabaseClient() *SupabaseClient {
+func NewSupabaseClient() *supabase.Client {
 	url := os.Getenv("SUPABASE_URL")
 	key := os.Getenv("SUPABASE_KEY")
 
@@ -20,5 +16,5 @@ func NewSupabaseClient() *SupabaseClient {
 		log.Fatalf("Failed to create Supabase client: %v", err)
 	}
 
-	return &SupabaseClient{Client: client}
+	return client
 }
