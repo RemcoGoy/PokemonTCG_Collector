@@ -9,9 +9,8 @@ import (
 
 	sb "backend/internal/supabase"
 
-	"github.com/nedpals/supabase-go"
-
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/nedpals/supabase-go"
 )
 
 type Server struct {
