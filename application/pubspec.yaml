@@ -1,0 +1,45 @@
+name: application
+description: "A new Flutter project."
+publish_to: 'none'
+version: 3.27.0
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.16
+  http: ^1.2.2
+  camera: ^0.11.0+2
+  gal: ^2.3.1
+
+dependency_overrides:
+  camera_android: 0.9.7+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: red hat text
+      fonts:
+        - asset: assets\fonts\Red_Hat_Text\static\RedHatText-Regular.ttf
+          weight: 400
+        - asset: assets\fonts\Red_Hat_Text\static\RedHatText-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets\fonts\Red_Hat_Text\static\RedHatText-Medium.ttf
+          weight: 500
+        - asset: assets\fonts\Red_Hat_Text\static\RedHatText-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets\fonts\Red_Hat_Text\static\RedHatText-Bold.ttf
+          weight: 700
+        - asset: assets\fonts\Red_Hat_Text\static\RedHatText-BoldItalic.ttf
+          weight: 700
+          style: italic
