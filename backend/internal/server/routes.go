@@ -22,14 +22,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Get("/", s.HelloWorldHandler)
+	r.Get("/ok", s.okHandler)
+	r.Mount("/auth", AuthRouter(s))
 
 	return r
 }
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
+func (s *Server) okHandler(w http.ResponseWriter, r *http.Request) {
+	resp := make(map[string]bool)
+	resp["ok"] = true
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
