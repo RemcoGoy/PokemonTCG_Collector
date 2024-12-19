@@ -7,21 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/supabase-community/gotrue-go/types"
 )
-
-type MockSupabaseClient struct {
-	Auth *MockAuth
-}
-
-type MockAuth struct {
-	SignupFunc func(types.SignupRequest) (types.SignupResponse, error)
-}
-
-func (m *MockAuth) Signup(req types.SignupRequest) (types.SignupResponse, error) {
-	return m.SignupFunc(req)
-}
 
 func TestOkHandler(t *testing.T) {
 	s := &Server{}
@@ -53,14 +39,17 @@ func TestSignupHandler(t *testing.T) {
 	s := &Server{}
 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
 	defer server.Close()
+
 	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", user_email, user_password)))
 	if err != nil {
 		t.Fatalf("error making request to server. Err: %v", err)
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected status OK; got %v", resp.Status)
 	}
+
 	expected := fmt.Sprintf("{\"email\":\"%s\"}", user_email)
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
