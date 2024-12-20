@@ -53,6 +53,14 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
+	if r.Header.Get("Authorization") == "" {
+		resp["error"] = "Missing Authorization header"
+		w.WriteHeader(http.StatusUnauthorized)
+		jsonResp, _ := json.Marshal(resp)
+		w.Write(jsonResp)
+		return
+	}
+
 	token := r.Header.Get("Authorization")
 	token = token[7:] // Remove "Bearer " prefix
 	err := s.SupabaseClient.Auth.SignOut(context.Background(), token)
