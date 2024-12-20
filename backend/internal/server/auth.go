@@ -115,10 +115,46 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
+	resp := make(map[string]any)
+	if r.Header.Get("Authorization") == "" {
+		resp["error"] = "Missing Authorization header"
+		w.WriteHeader(http.StatusUnauthorized)
+		jsonResp, _ := json.Marshal(resp)
+		w.Write(jsonResp)
+		return
+	}
+
+	token := r.Header.Get("Authorization")
+	token = token[7:] // Remove "Bearer " prefix
+	user, err := s.SupabaseClient.Auth.User(context.Background(), token)
+	if err != nil {
+		resp["error"] = err.Error()
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		resp["id"] = user.ID
+		resp["email"] = user.Email
+		resp["created_at"] = user.CreatedAt
+		resp["role"] = user.Role
+		w.Header().Set("Content-Type", "application/json")
+	}
+
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		resp["error"] = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	_, _ = w.Write(jsonResp)
+}
+
 func AuthRouter(s *Server) chi.Router {
 	r := chi.NewRouter()
 	r.Post("/login", s.Login)
 	r.Post("/signup", s.Signup)
 	r.Post("/logout", s.Logout)
+	r.Get("/user", s.GetUser)
 	return r
 }
