@@ -10,19 +10,18 @@ import (
 	sb "backend/internal/supabase"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/nedpals/supabase-go"
 )
 
 type Server struct {
-	SupabaseClient *supabase.Client
-	port           int
+	SupabaseFactory *sb.SupabaseFactory
+	port            int
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
-		SupabaseClient: sb.NewSupabaseClient(),
-		port:           port,
+		SupabaseFactory: sb.NewSupabaseFactory(),
+		port:            port,
 	}
 
 	// Declare Server config

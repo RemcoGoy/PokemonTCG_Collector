@@ -1,15 +1,40 @@
 package supabase
 
 import (
+	"log"
 	"os"
 
-	"github.com/nedpals/supabase-go"
+	"github.com/supabase-community/gotrue-go/types"
+	"github.com/supabase-community/supabase-go"
 )
 
-func NewSupabaseClient() *supabase.Client {
+type SupabaseFactory struct {
+	url string
+	key string
+}
+
+func NewSupabaseFactory() *SupabaseFactory {
 	url := os.Getenv("SUPABASE_URL")
 	key := os.Getenv("SUPABASE_KEY")
 
-	supabase := supabase.CreateClient(url, key)
-	return supabase
+	return &SupabaseFactory{
+		url: url,
+		key: key,
+	}
+}
+
+func (f *SupabaseFactory) CreateClient() *supabase.Client {
+	client, err := supabase.NewClient(f.url, f.key, &supabase.ClientOptions{})
+	if err != nil {
+		log.Fatalf("Error creating Supabase client: %v", err)
+	}
+	return client
+}
+
+func (f *SupabaseFactory) CreateAuthenticatedClient(token string) *supabase.Client {
+	client := f.CreateClient()
+	session := types.Session{}
+	session.AccessToken = token
+	client.UpdateAuthSession(session)
+	return client
 }
