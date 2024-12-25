@@ -1,11 +1,9 @@
 package test
 
 import (
-	"github.com/nedpals/supabase-go"
+	"github.com/supabase-community/supabase-go"
 )
 
 func NewMockSupabaseClient() *supabase.Client {
-	return &supabase.Client{
-		Auth: &supabase.Auth{},
-	}
+	return &supabase.Client{}
 }
