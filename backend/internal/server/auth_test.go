@@ -1,61 +1,87 @@
 package server
 
-// func TestSignupHandler(t *testing.T) {
-// 	user_email := "remco.goy@hotmail.com"
-// 	user_password := "testpwd"
+import (
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 
-// 	s := &Server{
-// 		SupabaseClient: test.NewMockSupabaseClient(),
-// 	}
-// 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
-// 	defer server.Close()
+	"backend/internal/test"
 
-// 	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", user_email, user_password)))
-// 	if err != nil {
-// 		t.Fatalf("error making request to server. Err: %v", err)
-// 	}
-// 	defer resp.Body.Close()
+	"github.com/supabase-community/gotrue-go/types"
+)
 
-// 	if resp.StatusCode != http.StatusOK {
-// 		t.Errorf("expected status OK; got %v", resp.Status)
-// 	}
+func TestSignupHandler(t *testing.T) {
+	user_email := "remco.goy@hotmail.com"
+	user_password := "testpwd"
 
-// 	expected := fmt.Sprintf("{\"email\":\"%s\"}", user_email)
-// 	body, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		t.Fatalf("error reading response body. Err: %v", err)
-// 	}
-// 	if expected != string(body) {
-// 		t.Errorf("expected response body to be %v; got %v", expected, string(body))
-// 	}
-// }
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(),
+	}
+	server := httptest.NewServer(http.HandlerFunc(s.Signup))
+	defer server.Close()
 
-// func TestSignupFailedHandler(t *testing.T) {
-// 	user_email := "remco.goy@hotmail.com"
-// 	user_password := "testpwd"
+	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", user_email, user_password)))
+	if err != nil {
+		t.Fatalf("error making request to server. Err: %v", err)
+	}
+	defer resp.Body.Close()
 
-// 	s := &Server{
-// 		SupabaseClient: test.NewMockSupabaseClient(),
-// 	}
-// 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
-// 	defer server.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected status OK; got %v", resp.Status)
+	}
 
-// 	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", user_email, user_password)))
-// 	if err != nil {
-// 		t.Fatalf("error making request to server. Err: %v", err)
-// 	}
-// 	defer resp.Body.Close()
+	expected := fmt.Sprintf("{\"email\":\"%s\"}", user_email)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("error reading response body. Err: %v", err)
+	}
+	if expected != string(body) {
+		t.Errorf("expected response body to be %v; got %v", expected, string(body))
+	}
+}
 
-// 	if resp.StatusCode != http.StatusBadRequest {
-// 		t.Errorf("expected status OK; got %v", resp.Status)
-// 	}
+type FailedSignupAuth struct {
+	test.MockAuth
+}
 
-// 	expected := fmt.Sprintf("{\"error\":\"%s\"}", "error")
-// 	body, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		t.Fatalf("error reading response body. Err: %v", err)
-// 	}
-// 	if expected != string(body) {
-// 		t.Errorf("expected response body to be %v; got %v", expected, string(body))
-// 	}
-// }
+func (m *FailedSignupAuth) Signup(req types.SignupRequest) (*types.SignupResponse, error) {
+	return nil, errors.New("error")
+}
+
+func TestSignupFailedHandler(t *testing.T) {
+	user_email := "remco.goy@hotmail.com"
+	user_password := "testpwd"
+
+	auth := &FailedSignupAuth{}
+	factory := test.NewMockSupabaseFactory()
+	factory.Auth = auth
+
+	s := &Server{
+		SupabaseFactory: factory,
+	}
+	server := httptest.NewServer(http.HandlerFunc(s.Signup))
+	defer server.Close()
+
+	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", user_email, user_password)))
+	if err != nil {
+		t.Fatalf("error making request to server. Err: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status BadRequest; got %v", resp.Status)
+	}
+
+	expected := fmt.Sprintf("{\"error\":\"%s\"}", "error")
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("error reading response body. Err: %v", err)
+	}
+	if expected != string(body) {
+		t.Errorf("expected response body to be %v; got %v", expected, string(body))
+	}
+}

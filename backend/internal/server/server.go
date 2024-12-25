@@ -13,7 +13,7 @@ import (
 )
 
 type Server struct {
-	SupabaseFactory *sb.SupabaseFactory
+	SupabaseFactory sb.SupabaseFactoryInterface
 	port            int
 }
 

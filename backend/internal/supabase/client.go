@@ -13,6 +13,13 @@ type SupabaseFactory struct {
 	key string
 }
 
+type SupabaseFactoryInterface interface {
+	CreateClient() *supabase.Client
+	CreateAuthenticatedClient(token string) *supabase.Client
+}
+
+var _ SupabaseFactoryInterface = (*SupabaseFactory)(nil)
+
 func NewSupabaseFactory() *SupabaseFactory {
 	url := os.Getenv("SUPABASE_URL")
 	key := os.Getenv("SUPABASE_KEY")

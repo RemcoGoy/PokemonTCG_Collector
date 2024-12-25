@@ -38,10 +38,8 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		resp["error"] = err.Error()
 		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	_, _ = w.Write(jsonResp)
@@ -70,10 +68,8 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		resp["error"] = err.Error()
 		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	_, _ = w.Write(jsonResp)
@@ -102,10 +98,8 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		resp["error"] = err.Error()
 		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	_, _ = w.Write(jsonResp)
@@ -138,10 +132,8 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		resp["error"] = err.Error()
 		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	_, _ = w.Write(jsonResp)
