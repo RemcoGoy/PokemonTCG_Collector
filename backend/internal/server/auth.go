@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/supabase-community/gotrue-go/types"
+
+	t "backend/internal/types"
 )
 
 type LoginRequest struct {
@@ -16,6 +18,7 @@ type LoginRequest struct {
 type RegisterRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Username string `json:"username"`
 }
 
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
@@ -87,12 +90,29 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 			Email:    registerRequest.Email,
 			Password: registerRequest.Password,
 		})
+
 		if err != nil {
 			resp["error"] = err.Error()
 			w.WriteHeader(http.StatusBadRequest)
 		} else {
-			resp["email"] = user.Email
-			w.Header().Set("Content-Type", "application/json")
+			profile := t.Profile{
+				ID:       user.ID,
+				Username: registerRequest.Username,
+			}
+			_, _, err := s.SupabaseFactory.CreateAdminClient().From("profile").Insert(profile, true, "", "", "").Execute()
+			if err != nil {
+				resp["error"] = err.Error()
+
+				err = s.SupabaseFactory.CreateAdminClient().Auth.AdminDeleteUser(types.AdminDeleteUserRequest{UserID: user.ID})
+				if err != nil {
+					resp["error"] = err.Error()
+				}
+
+				w.WriteHeader(http.StatusBadRequest)
+			} else {
+				resp["email"] = user.Email
+				w.Header().Set("Content-Type", "application/json")
+			}
 		}
 	}
 

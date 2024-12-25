@@ -9,13 +9,15 @@ import (
 )
 
 type SupabaseFactory struct {
-	url string
-	key string
+	url       string
+	key       string
+	admin_key string
 }
 
 type SupabaseFactoryInterface interface {
 	CreateClient() *supabase.Client
 	CreateAuthenticatedClient(token string) *supabase.Client
+	CreateAdminClient() *supabase.Client
 }
 
 var _ SupabaseFactoryInterface = (*SupabaseFactory)(nil)
@@ -23,10 +25,12 @@ var _ SupabaseFactoryInterface = (*SupabaseFactory)(nil)
 func NewSupabaseFactory() *SupabaseFactory {
 	url := os.Getenv("SUPABASE_URL")
 	key := os.Getenv("SUPABASE_KEY")
+	admin_key := os.Getenv("SUPABASE_ADMIN_KEY")
 
 	return &SupabaseFactory{
-		url: url,
-		key: key,
+		url:       url,
+		key:       key,
+		admin_key: admin_key,
 	}
 }
 
@@ -42,6 +46,17 @@ func (f *SupabaseFactory) CreateAuthenticatedClient(token string) *supabase.Clie
 	client := f.CreateClient()
 	session := types.Session{}
 	session.AccessToken = token
+	client.UpdateAuthSession(session)
+	return client
+}
+
+func (f *SupabaseFactory) CreateAdminClient() *supabase.Client {
+	client, err := supabase.NewClient(f.url, f.admin_key, &supabase.ClientOptions{})
+	if err != nil {
+		log.Fatalf("Error creating Supabase client: %v", err)
+	}
+	session := types.Session{}
+	session.AccessToken = f.admin_key
 	client.UpdateAuthSession(session)
 	return client
 }

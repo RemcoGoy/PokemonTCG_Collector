@@ -32,6 +32,10 @@ func (f *MockSupabaseFactory) CreateAuthenticatedClient(token string) *supabase.
 	return client
 }
 
+func (f *MockSupabaseFactory) CreateAdminClient() *supabase.Client {
+	return f.CreateClient()
+}
+
 type MockSupabaseClient struct {
 	*supabase.Client
 }
