@@ -37,6 +37,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(m.CheckJwtToken)
 		r.Mount("/user", UserRouter(s))
+		r.Mount("/collection", CollectionRouter(s))
 	})
 
 	return r
