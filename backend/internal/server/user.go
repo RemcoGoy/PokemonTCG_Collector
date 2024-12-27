@@ -1,6 +1,7 @@
 package server
 
 import (
+	"backend/internal/middleware"
 	t "backend/internal/types"
 	"backend/internal/utils"
 	"encoding/json"
@@ -11,13 +12,8 @@ import (
 
 func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
-	if r.Header.Get("Authorization") == "" {
-		utils.JSONError(w, "Missing Authorization header", http.StatusUnauthorized)
-		return
-	}
+	token := r.Context().Value(middleware.JwtTokenKey).(string)
 
-	token := r.Header.Get("Authorization")
-	token = token[7:] // Remove "Bearer " prefix
 	user_client := s.SupabaseFactory.CreateAuthenticatedClient(token)
 
 	user, err := user_client.Auth.GetUser()

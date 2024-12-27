@@ -9,6 +9,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
+
+	m "backend/internal/middleware"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -25,9 +27,17 @@ func (s *Server) RegisterRoutes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Get("/ok", s.okHandler)
-	r.Mount("/auth", AuthRouter(s))
-	r.Mount("/user", UserRouter(s))
+	// Public routes
+	r.Group(func(r chi.Router) {
+		r.Get("/ok", s.okHandler)
+		r.Mount("/auth", AuthRouter(s))
+	})
+
+	// Private routes
+	r.Group(func(r chi.Router) {
+		r.Use(m.CheckJwtToken)
+		r.Mount("/user", UserRouter(s))
+	})
 
 	return r
 }
