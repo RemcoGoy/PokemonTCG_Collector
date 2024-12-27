@@ -52,10 +52,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 	if r.Header.Get("Authorization") == "" {
-		resp["error"] = "Missing Authorization header"
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResp, _ := json.Marshal(resp)
-		w.Write(jsonResp)
+		utils.JSONError(w, "Missing Authorization header", http.StatusUnauthorized)
 		return
 	}
 
@@ -125,61 +122,10 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
-func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]any)
-	if r.Header.Get("Authorization") == "" {
-		resp["error"] = "Missing Authorization header"
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResp, _ := json.Marshal(resp)
-		w.Write(jsonResp)
-		return
-	}
-
-	token := r.Header.Get("Authorization")
-	token = token[7:] // Remove "Bearer " prefix
-	user_client := s.SupabaseFactory.CreateAuthenticatedClient(token)
-
-	user, err := user_client.Auth.GetUser()
-	if err != nil {
-		utils.JSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	data, count, err := user_client.From("profile").Select("*", "exact", false).Eq("id", user.ID.String()).Execute()
-	if err != nil || count != 0 {
-		utils.JSONError(w, "Could not fetch user profile", http.StatusBadRequest)
-		return
-	}
-
-	var profiles []t.Profile
-	err = json.Unmarshal(data, &profiles)
-	if err != nil {
-		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	profile := profiles[0]
-	resp["profile"] = profile
-	resp["id"] = user.ID
-	resp["email"] = user.Email
-	resp["created_at"] = user.CreatedAt
-	resp["role"] = user.Role
-	w.Header().Set("Content-Type", "application/json")
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	_, _ = w.Write(jsonResp)
-}
-
 func AuthRouter(s *Server) chi.Router {
 	r := chi.NewRouter()
 	r.Post("/login", s.Login)
 	r.Post("/signup", s.Signup)
 	r.Post("/logout", s.Logout)
-	r.Get("/user", s.GetUser)
 	return r
 }

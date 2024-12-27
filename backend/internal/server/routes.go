@@ -27,6 +27,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Get("/ok", s.okHandler)
 	r.Mount("/auth", AuthRouter(s))
+	r.Mount("/user", UserRouter(s))
 
 	return r
 }
