@@ -27,18 +27,18 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
 	if err != nil {
-		resp["error"] = err.Error()
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		token, err := s.SupabaseFactory.CreateClient().Auth.SignInWithEmailPassword(loginRequest.Email, loginRequest.Password)
-		if err != nil {
-			resp["error"] = err.Error()
-			w.WriteHeader(http.StatusBadRequest)
-		} else {
-			resp["token"] = token.AccessToken
-			w.Header().Set("Content-Type", "application/json")
-		}
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+
+	token, err := s.SupabaseFactory.CreateClient().Auth.SignInWithEmailPassword(loginRequest.Email, loginRequest.Password)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp["token"] = token.AccessToken
+	w.Header().Set("Content-Type", "application/json")
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
@@ -64,11 +64,11 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	err := s.SupabaseFactory.CreateAuthenticatedClient(token).Auth.Logout()
 
 	if err != nil {
-		resp["error"] = err.Error()
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
