@@ -1,7 +1,6 @@
 package server
 
 import (
-	"backend/internal/middleware"
 	t "backend/internal/types"
 	"backend/internal/utils"
 	"encoding/json"
@@ -12,7 +11,7 @@ import (
 
 func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
-	token := r.Context().Value(middleware.JwtTokenKey).(string)
+	token := r.Context().Value(t.JwtTokenKey).(string)
 
 	user_client := s.SupabaseFactory.CreateAuthenticatedClient(token)
 

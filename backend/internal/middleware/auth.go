@@ -10,13 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Add at package level
-type contextKey string
-
-const JwtTokenKey contextKey = "jwt_token"
-const UserEmail contextKey = "user_email"
-const UserID contextKey = "user_id"
-
 func CheckJwtToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
@@ -40,9 +33,9 @@ func CheckJwtToken(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), JwtTokenKey, tokenString)
-		ctx = context.WithValue(ctx, UserEmail, claims.Email)
-		ctx = context.WithValue(ctx, UserID, claims.ID)
+		ctx := context.WithValue(r.Context(), types.JwtTokenKey, tokenString)
+		ctx = context.WithValue(ctx, types.UserEmail, claims.Email)
+		ctx = context.WithValue(ctx, types.UserID, claims.ID)
 		next.ServeHTTP(rw, r.WithContext(ctx))
 	})
 }
