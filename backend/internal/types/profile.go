@@ -1,8 +1,13 @@
 package types
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Profile struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Username  string    `json:"username"`
 }
