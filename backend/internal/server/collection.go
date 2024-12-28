@@ -5,7 +5,6 @@ import (
 	"backend/internal/utils"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -45,7 +44,14 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GetCollection(w http.ResponseWriter, r *http.Request) {
 	collection := r.Context().Value(types.CollectionData).(types.Collection)
-	fmt.Println(collection)
+
+	jsonResp, err := json.Marshal(collection)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
 }
 
 func (s *Server) CollectionCtx(next http.Handler) http.Handler {
