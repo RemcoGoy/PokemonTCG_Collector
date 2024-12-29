@@ -39,6 +39,7 @@ func (f *SupabaseFactory) CreateClient() *supabase.Client {
 	if err != nil {
 		log.Fatalf("Error creating Supabase client: %v", err)
 	}
+
 	return client
 }
 

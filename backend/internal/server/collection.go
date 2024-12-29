@@ -72,7 +72,6 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Context().Value(types.JwtTokenKey).(string)
 	userID := r.Context().Value(types.UserID).(string)
-	user_client := s.SupabaseFactory.CreateAuthenticatedClient(token)
 
 	collection := types.Collection{
 		ID:        uuid.New(),
@@ -80,7 +79,7 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		UserID:    uuid.MustParse(userID),
 		Name:      createCollectionRequest.Name,
 	}
-	_, _, err = user_client.From("collection").Insert(collection, false, "", "", "exact").Execute()
+	err = s.DbConnector.CreateCollection(collection, token)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return

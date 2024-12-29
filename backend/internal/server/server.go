@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"backend/internal/db"
 	sb "backend/internal/supabase"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -14,13 +15,17 @@ import (
 
 type Server struct {
 	SupabaseFactory sb.SupabaseFactoryInterface
+	DbConnector     db.DbConnectorInterface
 	port            int
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	supabaseFactory := sb.NewSupabaseFactory()
+
 	NewServer := &Server{
-		SupabaseFactory: sb.NewSupabaseFactory(),
+		SupabaseFactory: supabaseFactory,
+		DbConnector:     db.NewDbConnector(supabaseFactory),
 		port:            port,
 	}
 
