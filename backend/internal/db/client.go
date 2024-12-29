@@ -11,6 +11,8 @@ type DbConnector struct {
 
 type DbConnectorInterface interface {
 	CreateCollection(collection types.Collection, token string) error
+	GetCollection(id string, userID string, token string) (types.Collection, error)
+	ListCollections(userID string, token string) ([]types.Collection, int64, error)
 }
 
 var _ DbConnectorInterface = (*DbConnector)(nil)

@@ -21,18 +21,9 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 	token := r.Context().Value(types.JwtTokenKey).(string)
 	userID := r.Context().Value(types.UserID).(string)
 
-	user_client := s.SupabaseFactory.CreateAuthenticatedClient(token)
-
-	data, count, err := user_client.From("collection").Select("*", "exact", false).Eq("user_id", userID).Execute()
+	collections, count, err := s.DbConnector.ListCollections(userID, token)
 	if err != nil {
-		utils.JSONError(w, "Could not fetch collections", http.StatusBadRequest)
-		return
-	}
-
-	var collections []types.Collection
-	err = json.Unmarshal(data, &collections)
-	if err != nil {
-		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -110,22 +101,14 @@ func (s *Server) CollectionCtx(next http.Handler) http.Handler {
 		token := r.Context().Value(types.JwtTokenKey).(string)
 		userID := r.Context().Value(types.UserID).(string)
 
-		user_client := s.SupabaseFactory.CreateAuthenticatedClient(token)
-		data, _, err := user_client.From("collection").Select("*", "exact", false).Eq("id", id).Eq("user_id", userID).Execute()
+		collection, err := s.DbConnector.GetCollection(id, userID, token)
 		if err != nil {
 			http.Error(w, http.StatusText(404), 404)
 			return
 		}
 
-		var collections []types.Collection
-		err = json.Unmarshal(data, &collections)
-		if err != nil {
-			utils.JSONError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		ctx := context.WithValue(r.Context(), types.CollectionID, id)
-		ctx = context.WithValue(ctx, types.CollectionData, collections[0])
+		ctx = context.WithValue(ctx, types.CollectionData, collection)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
