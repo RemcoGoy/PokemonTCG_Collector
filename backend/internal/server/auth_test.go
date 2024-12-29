@@ -81,3 +81,40 @@ func TestLoginFailed(t *testing.T) {
 		t.Error("expected response to contain error key")
 	}
 }
+
+func TestSignupHandler(t *testing.T) {
+	user_email := "remco.goy@hotmail.com"
+	user_password := "testpwd"
+	username := "remco"
+
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewMockDbConnector(),
+	}
+	server := httptest.NewServer(http.HandlerFunc(s.Signup))
+	defer server.Close()
+
+	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\",\"username\":\"%s\"}", user_email, user_password, username)))
+	if err != nil {
+		t.Fatalf("error making request to server. Err: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected status OK; got %v", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("error reading response body. Err: %v", err)
+	}
+	var response map[string]interface{}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		t.Fatalf("error unmarshaling response body: %v", err)
+	}
+
+	if _, ok := response["email"]; !ok {
+		t.Error("expected response to contain email key")
+	}
+}
