@@ -12,7 +12,7 @@ func TestOkHandler(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.okHandler))
 	defer server.Close()
 
-	status_code, body := test.DoTestCall(t, server, "GET", "", nil)
+	status_code, body := test.DoTestCall(t, server, "GET", "", nil, "")
 
 	if status_code != http.StatusOK {
 		t.Errorf("expected status OK; got %v", status_code)

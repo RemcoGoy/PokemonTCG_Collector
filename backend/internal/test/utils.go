@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func DoTestCall(t *testing.T, server *httptest.Server, method string, token string, reqBody io.Reader) (int, map[string]interface{}) {
-	req, err := http.NewRequest(method, server.URL, reqBody)
+func DoTestCall(t *testing.T, server *httptest.Server, method string, token string, reqBody io.Reader, path string) (int, map[string]interface{}) {
+	req, err := http.NewRequest(method, server.URL+path, reqBody)
 	if err != nil {
 		t.Fatalf("error creating request: %v", err)
 	}

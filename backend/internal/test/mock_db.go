@@ -3,6 +3,8 @@ package test
 import (
 	"backend/internal/db"
 	"backend/internal/types"
+
+	"github.com/google/uuid"
 )
 
 type MockDbConnector struct {
@@ -27,7 +29,10 @@ func (m *MockDbConnector) CreateCollection(collection types.Collection, token st
 }
 
 func (m *MockDbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {
-	return types.Collection{}, nil
+	return types.Collection{
+		ID:   uuid.MustParse(COLLECTION_ID),
+		Name: "TestCollection",
+	}, nil
 }
 
 func (m *MockDbConnector) ListCollections(userID string, token string) ([]types.Collection, int64, error) {
