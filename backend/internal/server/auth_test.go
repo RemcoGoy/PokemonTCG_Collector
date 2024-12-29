@@ -1,9 +1,7 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,27 +24,13 @@ func TestLoginHandler(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.Login))
 	defer server.Close()
 
-	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", USER_EMAIL, USER_PWD)))
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
+	status_code, body := test.DoTestCall(t, server, "POST", "", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", USER_EMAIL, USER_PWD)))
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("expected status OK; got %v", resp.Status)
+	if status_code != http.StatusOK {
+		t.Errorf("expected status OK; got %v", status_code)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("error reading response body. Err: %v", err)
-	}
-	var response map[string]interface{}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		t.Fatalf("error unmarshaling response body: %v", err)
-	}
-
-	if _, ok := response["token"]; !ok {
+	if _, ok := body["token"]; !ok {
 		t.Error("expected response to contain token key")
 	}
 }
@@ -58,27 +42,13 @@ func TestLoginFailed(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.Login))
 	defer server.Close()
 
-	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", USER_EMAIL, USER_PWD)))
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
+	status_code, body := test.DoTestCall(t, server, "POST", "", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\"}", USER_EMAIL, USER_PWD)))
 
-	if resp.StatusCode != http.StatusBadRequest {
-		t.Errorf("expected status BadRequest; got %v", resp.Status)
+	if status_code != http.StatusBadRequest {
+		t.Errorf("expected status BadRequest; got %v", status_code)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("error reading response body. Err: %v", err)
-	}
-	var response map[string]interface{}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		t.Fatalf("error unmarshaling response body: %v", err)
-	}
-
-	if _, ok := response["error"]; !ok {
+	if _, ok := body["error"]; !ok {
 		t.Error("expected response to contain error key")
 	}
 }
@@ -91,27 +61,13 @@ func TestSignupHandler(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
 	defer server.Close()
 
-	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\",\"username\":\"%s\"}", USER_EMAIL, USER_PWD, USERNAME)))
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
+	status_code, body := test.DoTestCall(t, server, "POST", "", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\",\"username\":\"%s\"}", USER_EMAIL, USER_PWD, USERNAME)))
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("expected status OK; got %v", resp.Status)
+	if status_code != http.StatusOK {
+		t.Errorf("expected status OK; got %v", status_code)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("error reading response body. Err: %v", err)
-	}
-	var response map[string]interface{}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		t.Fatalf("error unmarshaling response body: %v", err)
-	}
-
-	if _, ok := response["email"]; !ok {
+	if _, ok := body["email"]; !ok {
 		t.Error("expected response to contain email key")
 	}
 }
@@ -124,27 +80,13 @@ func TestSignupFailed(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.Signup))
 	defer server.Close()
 
-	resp, err := http.Post(server.URL, "application/json", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\",\"username\":\"%s\"}", USER_EMAIL, USER_PWD, USERNAME)))
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
+	status_code, body := test.DoTestCall(t, server, "POST", "", strings.NewReader(fmt.Sprintf("{\"email\":\"%s\",\"password\":\"%s\",\"username\":\"%s\"}", USER_EMAIL, USER_PWD, USERNAME)))
 
-	if resp.StatusCode != http.StatusBadRequest {
-		t.Errorf("expected status BadRequest; got %v", resp.Status)
+	if status_code != http.StatusBadRequest {
+		t.Errorf("expected status BadRequest; got %v", status_code)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("error reading response body. Err: %v", err)
-	}
-	var response map[string]interface{}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		t.Fatalf("error unmarshaling response body: %v", err)
-	}
-
-	if _, ok := response["error"]; !ok {
+	if _, ok := body["error"]; !ok {
 		t.Error("expected response to contain error key")
 	}
 }
@@ -156,19 +98,10 @@ func TestLogoutHandler(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.Logout))
 	defer server.Close()
 
-	req, err := http.NewRequest("POST", server.URL, nil)
-	if err != nil {
-		t.Fatalf("error creating request: %v", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+TEST_TOKEN)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
+	status_code, _ := test.DoTestCall(t, server, "POST", TEST_TOKEN, nil)
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("expected status OK; got %v", resp.Status)
+	if status_code != http.StatusOK {
+		t.Errorf("expected status OK; got %v", status_code)
 	}
 }
 
@@ -179,13 +112,9 @@ func TestLogoutWithoutToken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(s.Logout))
 	defer server.Close()
 
-	resp, err := http.Post(server.URL, "application/json", nil)
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
+	status_code, _ := test.DoTestCall(t, server, "POST", "", nil)
 
-	if resp.StatusCode != http.StatusUnauthorized {
-		t.Errorf("expected status Unauthorized; got %v", resp.Status)
+	if status_code != http.StatusUnauthorized {
+		t.Errorf("expected status Unauthorized; got %v", status_code)
 	}
 }
