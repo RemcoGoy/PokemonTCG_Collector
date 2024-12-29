@@ -21,20 +21,12 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, count, err := user_client.From("profile").Select("*", "exact", false).Eq("id", user.ID.String()).Execute()
-	if err != nil || count != 1 {
-		utils.JSONError(w, "Could not fetch user profile", http.StatusBadRequest)
-		return
-	}
-
-	var profiles []t.Profile
-	err = json.Unmarshal(data, &profiles)
+	profile, err := s.DbConnector.GetProfile(user.ID.String(), token)
 	if err != nil {
-		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	profile := profiles[0]
 	resp["profile"] = profile
 	resp["id"] = user.ID
 	resp["email"] = user.Email

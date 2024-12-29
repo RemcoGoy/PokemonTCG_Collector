@@ -97,7 +97,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		ID:       user.ID,
 		Username: registerRequest.Username,
 	}
-	_, _, err = s.SupabaseFactory.CreateAdminClient().From("profile").Insert(profile, true, "", "", "exact").Execute()
+	err = s.DbConnector.CreateProfile(profile)
 	if err != nil {
 		del_err := s.SupabaseFactory.CreateAdminClient().Auth.AdminDeleteUser(types.AdminDeleteUserRequest{UserID: user.ID})
 		if del_err != nil {
