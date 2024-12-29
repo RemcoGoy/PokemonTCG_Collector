@@ -5,10 +5,20 @@ import (
 	"encoding/json"
 )
 
-func (d *DbConnector) CreateCollection(collection types.Collection, token string) error {
+func (d *DbConnector) CreateCollection(collection types.Collection, token string) (types.Collection, error) {
 	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
-	_, _, err := sb_client.From("collection").Insert(collection, false, "", "", "exact").Execute()
-	return err
+	data, _, err := sb_client.From("collection").Insert(collection, false, "", "", "exact").Execute()
+	if err != nil {
+		return types.Collection{}, err
+	}
+
+	var c types.Collection
+	err = json.Unmarshal(data, &c)
+	if err != nil {
+		return types.Collection{}, err
+	}
+
+	return c, nil
 }
 
 func (d *DbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {

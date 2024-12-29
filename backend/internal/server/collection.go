@@ -52,8 +52,6 @@ func (s *Server) GetCollection(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]any)
-
 	var createCollectionRequest CreateCollectionRequest
 	err := json.NewDecoder(r.Body).Decode(&createCollectionRequest)
 	if err != nil {
@@ -70,15 +68,13 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 		UserID:    uuid.MustParse(userID),
 		Name:      createCollectionRequest.Name,
 	}
-	err = s.DbConnector.CreateCollection(collection, token)
+	collection, err = s.DbConnector.CreateCollection(collection, token)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	resp["name"] = createCollectionRequest.Name
-
-	jsonResp, err := json.Marshal(resp)
+	jsonResp, err := json.Marshal(collection)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

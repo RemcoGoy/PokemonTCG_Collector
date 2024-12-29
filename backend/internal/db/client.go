@@ -15,7 +15,7 @@ type DbConnectorInterface interface {
 	GetProfile(id string, token string) (types.Profile, error)
 
 	// Collection
-	CreateCollection(collection types.Collection, token string) error
+	CreateCollection(collection types.Collection, token string) (types.Collection, error)
 	GetCollection(id string, userID string, token string) (types.Collection, error)
 	ListCollections(userID string, token string) ([]types.Collection, int64, error)
 }
