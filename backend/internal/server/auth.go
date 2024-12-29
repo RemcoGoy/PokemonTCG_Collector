@@ -38,7 +38,6 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp["token"] = token.AccessToken
-	w.Header().Set("Content-Type", "application/json")
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
@@ -111,7 +110,6 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp["email"] = user.Email
-	w.Header().Set("Content-Type", "application/json")
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {

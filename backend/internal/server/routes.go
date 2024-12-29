@@ -17,6 +17,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
+	r.Use(middleware.SetHeader("Content-Type", "application/json"))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Use(cors.Handler(cors.Options{
@@ -52,6 +53,5 @@ func (s *Server) okHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(jsonResp)
 }

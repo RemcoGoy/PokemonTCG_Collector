@@ -40,7 +40,6 @@ func (s *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	resp["email"] = user.Email
 	resp["created_at"] = user.CreatedAt
 	resp["role"] = user.Role
-	w.Header().Set("Content-Type", "application/json")
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
