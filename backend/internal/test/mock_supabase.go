@@ -10,8 +10,8 @@ type MockSupabaseFactory struct {
 	Auth gotrue.Client
 }
 
-func NewMockSupabaseFactory() *MockSupabaseFactory {
-	return &MockSupabaseFactory{}
+func NewMockSupabaseFactory(auth gotrue.Client) *MockSupabaseFactory {
+	return &MockSupabaseFactory{Auth: auth}
 }
 
 func (f *MockSupabaseFactory) CreateClient() *supabase.Client {

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/supabase-community/gotrue-go"
@@ -185,4 +186,12 @@ func (m *MockAuth) WithCustomGoTrueURL(url string) gotrue.Client {
 
 func (m *MockAuth) WithToken(token string) gotrue.Client {
 	return gotrue.New("test", "test")
+}
+
+type MockFailedAuth struct {
+	MockAuth
+}
+
+func (m *MockFailedAuth) SignInWithEmailPassword(email, password string) (*types.TokenResponse, error) {
+	return nil, errors.New("failed to sign in")
 }
