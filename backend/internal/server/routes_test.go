@@ -1,7 +1,7 @@
 package server
 
 import (
-	"io"
+	"backend/internal/test"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,21 +11,14 @@ func TestOkHandler(t *testing.T) {
 	s := &Server{}
 	server := httptest.NewServer(http.HandlerFunc(s.okHandler))
 	defer server.Close()
-	resp, err := http.Get(server.URL)
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
+
+	status_code, body := test.DoTestCall(t, server, "GET", "", nil)
+
+	if status_code != http.StatusOK {
+		t.Errorf("expected status OK; got %v", status_code)
 	}
-	defer resp.Body.Close()
-	// Assertions
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("expected status OK; got %v", resp.Status)
-	}
-	expected := "{\"ok\":true}"
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("error reading response body. Err: %v", err)
-	}
-	if expected != string(body) {
-		t.Errorf("expected response body to be %v; got %v", expected, string(body))
+
+	if ok, exists := body["ok"]; !exists || ok != true {
+		t.Error("expected response to contain ok key with value true")
 	}
 }
