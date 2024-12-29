@@ -2,7 +2,6 @@ package test
 
 import (
 	"github.com/supabase-community/gotrue-go"
-	"github.com/supabase-community/gotrue-go/types"
 	"github.com/supabase-community/supabase-go"
 )
 
@@ -23,11 +22,7 @@ func (f *MockSupabaseFactory) CreateClient() *supabase.Client {
 }
 
 func (f *MockSupabaseFactory) CreateAuthenticatedClient(token string) *supabase.Client {
-	client := f.CreateClient()
-	session := types.Session{}
-	session.AccessToken = token
-	client.UpdateAuthSession(session)
-	return client
+	return f.CreateClient()
 }
 
 func (f *MockSupabaseFactory) CreateAdminClient() *supabase.Client {

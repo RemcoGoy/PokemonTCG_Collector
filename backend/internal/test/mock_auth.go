@@ -195,3 +195,7 @@ type MockFailedAuth struct {
 func (m *MockFailedAuth) SignInWithEmailPassword(email, password string) (*types.TokenResponse, error) {
 	return nil, errors.New("failed to sign in")
 }
+
+func (m *MockFailedAuth) Signup(req types.SignupRequest) (*types.SignupResponse, error) {
+	return nil, errors.New("failed to sign up")
+}
