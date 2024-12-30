@@ -25,6 +25,10 @@ func (m *MockDbConnector) GetProfile(id string, token string) (types.Profile, er
 	return types.Profile{}, nil
 }
 
+func (m *MockDbConnector) AdminCreateCollection(collection types.Collection) error {
+	return nil
+}
+
 func (m *MockDbConnector) CreateCollection(collection types.Collection, token string) (types.Collection, error) {
 	return types.Collection{
 		ID:   uuid.MustParse(COLLECTION_ID),

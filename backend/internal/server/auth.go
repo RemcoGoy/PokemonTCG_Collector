@@ -3,8 +3,10 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/supabase-community/gotrue-go/types"
 
 	t "backend/internal/types"
@@ -119,15 +121,25 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		ID:       user.ID,
 		Username: registerRequest.Username,
 	}
-	err = s.DbConnector.CreateProfile(profile)
-	if err != nil {
+
+	creation_err := s.DbConnector.CreateProfile(profile)
+	if creation_err == nil {
+		creation_err = s.DbConnector.AdminCreateCollection(t.Collection{
+			ID:        uuid.New(),
+			Name:      "Default",
+			UserID:    user.ID,
+			CreatedAt: time.Now(),
+		})
+	}
+
+	if creation_err != nil {
 		del_err := s.SupabaseFactory.CreateAdminClient().Auth.AdminDeleteUser(types.AdminDeleteUserRequest{UserID: user.ID})
 		if del_err != nil {
 			utils.JSONError(w, del_err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		utils.JSONError(w, creation_err.Error(), http.StatusBadRequest)
 		return
 	}
 

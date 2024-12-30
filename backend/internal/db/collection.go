@@ -6,6 +6,16 @@ import (
 	"errors"
 )
 
+func (d *DbConnector) AdminCreateCollection(collection types.Collection) error {
+	sb_client := d.supabaseFactory.CreateAdminClient()
+	_, _, err := sb_client.From("collection").Insert(collection, false, "", "", "exact").Execute()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *DbConnector) CreateCollection(collection types.Collection, token string) (types.Collection, error) {
 	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
 	data, _, err := sb_client.From("collection").Insert(collection, false, "", "", "exact").Execute()
