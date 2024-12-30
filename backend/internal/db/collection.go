@@ -54,3 +54,24 @@ func (d *DbConnector) ListCollections(userID string, token string) ([]types.Coll
 
 	return collections, count, nil
 }
+
+func (d *DbConnector) UpdateCollection(id string, update types.UpdateCollectionRequest, token string) (types.Collection, error) {
+	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
+	data, _, err := sb_client.From("collection").Update(update, "", "exact").Eq("id", id).Execute()
+
+	if err != nil {
+		return types.Collection{}, err
+	}
+
+	var c []types.Collection
+	err = json.Unmarshal(data, &c)
+	if err != nil {
+		return types.Collection{}, err
+	}
+
+	return c[0], nil
+}
+
+func (d *DbConnector) DeleteCollection(id string, userID string, token string) error {
+	return nil
+}

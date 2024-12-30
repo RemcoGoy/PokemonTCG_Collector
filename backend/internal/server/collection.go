@@ -5,6 +5,7 @@ import (
 	"backend/internal/utils"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -129,7 +130,30 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	types.ErrorResponse
 //	@Router			/collection/{id} [put]
 func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request) {
+	prevCollection := r.Context().Value(types.CollectionData).(types.Collection)
+	token := r.Context().Value(types.JwtTokenKey).(string)
 
+	var updateCollectionRequest types.UpdateCollectionRequest
+	err := json.NewDecoder(r.Body).Decode(&updateCollectionRequest)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newCollection, err := s.DbConnector.UpdateCollection(prevCollection.ID.String(), updateCollectionRequest, token)
+	if err != nil {
+		fmt.Println(err)
+		utils.JSONError(w, "error updating collection", http.StatusBadRequest)
+		return
+	}
+
+	jsonResp, err := json.Marshal(newCollection)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
 }
 
 // DeleteCollectionHandler - Deletes a collection for a user

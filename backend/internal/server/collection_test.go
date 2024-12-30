@@ -146,3 +146,26 @@ func TestCreateCollectionHandler_Duplicate(t *testing.T) {
 		t.Errorf("expected response to contain error key with value 'error creating collection'; got %v", err)
 	}
 }
+
+func TestUpdateCollectionHandler(t *testing.T) {
+	new_name := "new_name"
+
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewMockDbConnector(),
+	}
+	handler := middleware.CheckJwtToken(s.CollectionCtx(http.HandlerFunc(s.UpdateCollection)))
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	t.Setenv("JWT_SECRET", "testsecret")
+	status_code, body := test.DoTestCall(t, server, "PUT", test.TEST_TOKEN, strings.NewReader(fmt.Sprintf("{\"name\":\"%s\"}", new_name)), "/"+test.COLLECTION_ID)
+
+	if status_code != http.StatusOK {
+		t.Errorf("expected status OK; got %v", status_code)
+	}
+
+	if name, ok := body["name"]; !ok || name != new_name {
+		t.Errorf("expected response to contain name key with value %s; got %v", new_name, name)
+	}
+}

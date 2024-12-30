@@ -18,6 +18,8 @@ type DbConnectorInterface interface {
 	CreateCollection(collection types.Collection, token string) (types.Collection, error)
 	GetCollection(id string, userID string, token string) (types.Collection, error)
 	ListCollections(userID string, token string) ([]types.Collection, int64, error)
+	UpdateCollection(id string, update types.UpdateCollectionRequest, token string) (types.Collection, error)
+	DeleteCollection(id string, userID string, token string) error
 }
 
 var _ DbConnectorInterface = (*DbConnector)(nil)
