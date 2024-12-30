@@ -73,5 +73,11 @@ func (d *DbConnector) UpdateCollection(id string, update types.UpdateCollectionR
 }
 
 func (d *DbConnector) DeleteCollection(id string, userID string, token string) error {
+	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
+	_, _, err := sb_client.From("collection").Delete("", "exact").Eq("id", id).Execute()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

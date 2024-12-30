@@ -169,3 +169,24 @@ func TestUpdateCollectionHandler(t *testing.T) {
 		t.Errorf("expected response to contain name key with value %s; got %v", new_name, name)
 	}
 }
+
+func TestDeleteCollectionHandler(t *testing.T) {
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewMockDbConnector(),
+	}
+	handler := middleware.CheckJwtToken(s.CollectionCtx(http.HandlerFunc(s.DeleteCollection)))
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	t.Setenv("JWT_SECRET", "testsecret")
+	status_code, body := test.DoTestCall(t, server, "DELETE", test.TEST_TOKEN, nil, "/"+test.COLLECTION_ID)
+
+	if status_code != http.StatusOK {
+		t.Errorf("expected status OK; got %v", status_code)
+	}
+
+	if _, ok := body["id"]; !ok || body["id"] != test.COLLECTION_ID {
+		t.Errorf("expected response to contain id key with value %s; got %v", test.COLLECTION_ID, body["id"])
+	}
+}

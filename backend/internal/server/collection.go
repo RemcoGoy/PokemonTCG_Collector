@@ -168,7 +168,22 @@ func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	types.ErrorResponse
 //	@Router			/collection/{id} [delete]
 func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request) {
+	collection := r.Context().Value(types.CollectionData).(types.Collection)
+	token := r.Context().Value(types.JwtTokenKey).(string)
 
+	err := s.DbConnector.DeleteCollection(collection.ID.String(), collection.UserID.String(), token)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	jsonResp, err := json.Marshal(collection)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
 }
 
 func (s *Server) CollectionCtx(next http.Handler) http.Handler {
