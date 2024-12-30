@@ -1,6 +1,9 @@
 # Use the official Golang image as the base image
 FROM golang:1.23.4-alpine
 
+# Install make
+RUN apk add --no-cache make
+
 # Set the working directory inside the container
 WORKDIR /app
 
@@ -14,7 +17,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN go build -o main cmd/api/main.go
+RUN make build
 
 # Expose port 3000
 EXPOSE 3000
