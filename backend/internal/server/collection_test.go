@@ -170,6 +170,27 @@ func TestUpdateCollectionHandler(t *testing.T) {
 	}
 }
 
+func TestUpdateCollectionHandler_InvalidId(t *testing.T) {
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewNotFoundDbConnector(),
+	}
+	handler := middleware.CheckJwtToken(s.CollectionCtx(http.HandlerFunc(s.UpdateCollection)))
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	t.Setenv("JWT_SECRET", "testsecret")
+	status_code, body := test.DoTestCall(t, server, "GET", test.TEST_TOKEN, nil, "/"+"invalid")
+
+	if status_code != http.StatusNotFound {
+		t.Errorf("expected status NOT_FOUND; got %v", status_code)
+	}
+
+	if err, ok := body["error"]; !ok || err != "collection not found" {
+		t.Errorf("expected response to contain error key with value 'collection not found'; got %v", err)
+	}
+}
+
 func TestDeleteCollectionHandler(t *testing.T) {
 	s := &Server{
 		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
@@ -188,5 +209,26 @@ func TestDeleteCollectionHandler(t *testing.T) {
 
 	if _, ok := body["id"]; !ok || body["id"] != test.COLLECTION_ID {
 		t.Errorf("expected response to contain id key with value %s; got %v", test.COLLECTION_ID, body["id"])
+	}
+}
+
+func TestDeleteCollectionHandler_InvalidId(t *testing.T) {
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewNotFoundDbConnector(),
+	}
+	handler := middleware.CheckJwtToken(s.CollectionCtx(http.HandlerFunc(s.DeleteCollection)))
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	t.Setenv("JWT_SECRET", "testsecret")
+	status_code, body := test.DoTestCall(t, server, "GET", test.TEST_TOKEN, nil, "/"+"invalid")
+
+	if status_code != http.StatusNotFound {
+		t.Errorf("expected status NOT_FOUND; got %v", status_code)
+	}
+
+	if err, ok := body["error"]; !ok || err != "collection not found" {
+		t.Errorf("expected response to contain error key with value 'collection not found'; got %v", err)
 	}
 }
