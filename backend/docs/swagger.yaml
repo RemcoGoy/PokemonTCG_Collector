@@ -1,6 +1,94 @@
+definitions:
+  types.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  types.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  types.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  types.LogoutResponse:
+    type: object
+  types.OkResponse:
+    properties:
+      ok:
+        type: boolean
+    type: object
+  types.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  types.RegisterResponse:
+    properties:
+      email:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Log a user in by email and password
+      parameters:
+      - description: Login request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Login a user
+      tags:
+      - Auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Log a user out
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.LogoutResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Logout a user
+      tags:
+      - Auth
   /ok:
     get:
       consumes:
@@ -10,12 +98,36 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{\"ok\": true}'
+          description: OK
           schema:
-            additionalProperties:
-              type: boolean
-            type: object
+            $ref: '#/definitions/types.OkResponse'
       summary: This API can be used as health check for this application.
       tags:
       - Health
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Sign up a user by email, password and username
+      parameters:
+      - description: Register request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Signup a user
+      tags:
+      - Auth
 swagger: "2.0"

@@ -11,20 +11,20 @@ import (
 	"backend/internal/utils"
 )
 
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
-
+// LoginHandler - Logs in a user
+//
+//	@Summary		Login a user
+//	@Description	Log a user in by email and password
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			loginRequest	body		types.LoginRequest	true	"Login request"
+//	@Success		200	{object}	types.LoginResponse
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/login [post]
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
-	var loginRequest LoginRequest
+	var loginRequest t.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
@@ -48,6 +48,17 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+// LogoutHandler - Logs out a user
+//
+//	@Summary		Logout a user
+//	@Description	Log a user out
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	types.LogoutResponse
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Failure		401	{object}	types.ErrorResponse
+//	@Router			/logout [post]
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 	if r.Header.Get("Authorization") == "" {
@@ -75,10 +86,21 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+// SignupHandler - Signs up a user
+//
+//	@Summary		Signup a user
+//	@Description	Sign up a user by email, password and username
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			registerRequest	body		types.RegisterRequest	true	"Register request"
+//	@Success		200	{object}	types.RegisterResponse
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/signup [post]
 func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 
-	var registerRequest RegisterRequest
+	var registerRequest t.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&registerRequest)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)

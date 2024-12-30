@@ -54,7 +54,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 //	@Tags			Health
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{object}	map[string]bool	"{\"ok\": true}"
+//	@Success		200	{object}	types.OkResponse
 //	@Router			/ok [get]
 func (s *Server) okHandler(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]bool)
