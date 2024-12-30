@@ -118,8 +118,9 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	profile := t.Profile{
-		ID:       user.ID,
-		Username: registerRequest.Username,
+		ID:        user.ID,
+		Username:  registerRequest.Username,
+		CreatedAt: time.Now(),
 	}
 
 	creation_err := s.DbConnector.CreateProfile(profile)
