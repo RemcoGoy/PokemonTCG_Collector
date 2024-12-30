@@ -77,8 +77,8 @@ func (s *Server) GetCollection(w http.ResponseWriter, r *http.Request) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			createCollectionRequest	body		types.CreateCollectionRequest	true	"Create collection request"
-//	@Success		200	{object}	types.Collection
-//	@Failure		400	{object}	types.ErrorResponse
+//	@Success		200						{object}	types.Collection
+//	@Failure		400						{object}	types.ErrorResponse
 //	@Router			/collection [post]
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	var createCollectionRequest types.CreateCollectionRequest
@@ -124,10 +124,10 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 //	@Tags			Collection
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		string	true	"Collection ID"
+//	@Param			id						path		string							true	"Collection ID"
 //	@Param			updateCollectionRequest	body		types.UpdateCollectionRequest	true	"Update collection request"
-//	@Success		200	{object}	types.Collection
-//	@Failure		400	{object}	types.ErrorResponse
+//	@Success		200						{object}	types.Collection
+//	@Failure		400						{object}	types.ErrorResponse
 //	@Router			/collection/{id} [put]
 func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 	prevCollection := r.Context().Value(types.CollectionData).(types.Collection)

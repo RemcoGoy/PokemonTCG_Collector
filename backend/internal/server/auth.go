@@ -19,8 +19,8 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			loginRequest	body		types.LoginRequest	true	"Login request"
-//	@Success		200	{object}	types.LoginResponse
-//	@Failure		400	{object}	types.ErrorResponse
+//	@Success		200				{object}	types.LoginResponse
+//	@Failure		400				{object}	types.ErrorResponse
 //	@Router			/login [post]
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
@@ -94,8 +94,8 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			registerRequest	body		types.RegisterRequest	true	"Register request"
-//	@Success		200	{object}	types.RegisterResponse
-//	@Failure		400	{object}	types.ErrorResponse
+//	@Success		200				{object}	types.RegisterResponse
+//	@Failure		400				{object}	types.ErrorResponse
 //	@Router			/signup [post]
 func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
