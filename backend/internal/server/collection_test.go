@@ -125,3 +125,24 @@ func TestCreateCollectionHandler_InvalidName(t *testing.T) {
 		t.Errorf("expected response to contain error key with value 'name is required'; got %v", err)
 	}
 }
+
+func TestCreateCollectionHandler_Duplicate(t *testing.T) {
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewDuplicateDbConnector(),
+	}
+	handler := middleware.CheckJwtToken(http.HandlerFunc(s.CreateCollection))
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	t.Setenv("JWT_SECRET", "testsecret")
+	status_code, body := test.DoTestCall(t, server, "POST", test.TEST_TOKEN, strings.NewReader(fmt.Sprintf("{\"name\":\"%s\"}", test.COLLECTION_NAME)), "")
+
+	if status_code != http.StatusBadRequest {
+		t.Errorf("expected status BAD_REQUEST; got %v", status_code)
+	}
+
+	if err, ok := body["error"]; !ok || err != "error creating collection" {
+		t.Errorf("expected response to contain error key with value 'error creating collection'; got %v", err)
+	}
+}

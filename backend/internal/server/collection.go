@@ -103,7 +103,7 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	}
 	collection, err = s.DbConnector.CreateCollection(collection, token)
 	if err != nil {
-		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		utils.JSONError(w, "error creating collection", http.StatusBadRequest)
 		return
 	}
 

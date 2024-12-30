@@ -43,6 +43,8 @@ func (m *MockDbConnector) ListCollections(userID string, token string) ([]types.
 	return []types.Collection{}, 0, nil
 }
 
+// Not Found Db Connector
+
 type NotFoundDbConnector struct {
 	MockDbConnector
 }
@@ -53,4 +55,18 @@ func NewNotFoundDbConnector() *NotFoundDbConnector {
 
 func (m *NotFoundDbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {
 	return types.Collection{}, errors.New("collection not found")
+}
+
+// Duplicate Db Connector
+
+type DuplicateDbConnector struct {
+	MockDbConnector
+}
+
+func NewDuplicateDbConnector() *DuplicateDbConnector {
+	return &DuplicateDbConnector{}
+}
+
+func (m *DuplicateDbConnector) CreateCollection(collection types.Collection, token string) (types.Collection, error) {
+	return types.Collection{}, errors.New("(23505) duplicate key value violates unique constraint \"collection_name_key\"")
 }
