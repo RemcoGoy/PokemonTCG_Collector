@@ -3,6 +3,7 @@ package test
 import (
 	"backend/internal/db"
 	"backend/internal/types"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -40,4 +41,16 @@ func (m *MockDbConnector) GetCollection(id string, userID string, token string) 
 
 func (m *MockDbConnector) ListCollections(userID string, token string) ([]types.Collection, int64, error) {
 	return []types.Collection{}, 0, nil
+}
+
+type NotFoundDbConnector struct {
+	MockDbConnector
+}
+
+func NewNotFoundDbConnector() *NotFoundDbConnector {
+	return &NotFoundDbConnector{}
+}
+
+func (m *NotFoundDbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {
+	return types.Collection{}, errors.New("collection not found")
 }

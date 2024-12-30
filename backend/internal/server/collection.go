@@ -104,7 +104,7 @@ func (s *Server) CollectionCtx(next http.Handler) http.Handler {
 
 		collection, err := s.DbConnector.GetCollection(id, userID, token)
 		if err != nil {
-			http.Error(w, http.StatusText(404), 404)
+			utils.JSONError(w, err.Error(), http.StatusNotFound)
 			return
 		}
 
