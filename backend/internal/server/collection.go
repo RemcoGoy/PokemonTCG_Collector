@@ -62,6 +62,11 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	token := r.Context().Value(types.JwtTokenKey).(string)
 	userID := r.Context().Value(types.UserID).(string)
 
+	if createCollectionRequest.Name == "" {
+		utils.JSONError(w, "name is required", http.StatusBadRequest)
+		return
+	}
+
 	collection := types.Collection{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),

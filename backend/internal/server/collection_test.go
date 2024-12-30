@@ -82,3 +82,25 @@ func TestCreateCollectionHandler(t *testing.T) {
 		t.Errorf("expected response to contain id key with value %s; got %v", test.COLLECTION_ID, id)
 	}
 }
+
+func TestCreateCollectionHandler_InvalidName(t *testing.T) {
+	s := &Server{
+		SupabaseFactory: test.NewMockSupabaseFactory(&test.MockAuth{}),
+		DbConnector:     test.NewMockDbConnector(),
+	}
+	handler := middleware.CheckJwtToken(http.HandlerFunc(s.CreateCollection))
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	t.Setenv("JWT_SECRET", "testsecret")
+
+	status_code, body := test.DoTestCall(t, server, "POST", test.TEST_TOKEN, strings.NewReader("{}"), "")
+
+	if status_code != http.StatusBadRequest {
+		t.Errorf("expected status BAD_REQUEST; got %v", status_code)
+	}
+
+	if err, ok := body["error"]; !ok || err != "name is required" {
+		t.Errorf("expected response to contain error key with value 'name is required'; got %v", err)
+	}
+}
