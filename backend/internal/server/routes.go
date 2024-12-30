@@ -9,7 +9,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
+	httpSwagger "github.com/swaggo/http-swagger"
 
+	_ "backend/docs"
 	m "backend/internal/middleware"
 )
 
@@ -30,6 +32,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Public routes
 	r.Group(func(r chi.Router) {
+		r.Mount("/swagger", httpSwagger.WrapHandler)
 		r.Get("/ok", s.okHandler)
 		r.Mount("/auth", AuthRouter(s))
 	})
@@ -44,6 +47,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 	return r
 }
 
+// OkHandler - Checks if the API is working
+//
+//	@Summary		This API can be used as health check for this application.
+//	@Description	Tells if the API is working or not.
+//	@Tags			Health
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	map[string]bool	"{\"ok\": true}"
+//	@Router			/ok [get]
 func (s *Server) okHandler(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]bool)
 	resp["ok"] = true

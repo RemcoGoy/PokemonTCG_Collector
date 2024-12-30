@@ -1,0 +1,21 @@
+info:
+  contact: {}
+paths:
+  /ok:
+    get:
+      consumes:
+      - application/json
+      description: Tells if the API is working or not.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{\"ok\": true}'
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+      summary: This API can be used as health check for this application.
+      tags:
+      - Health
+swagger: "2.0"
