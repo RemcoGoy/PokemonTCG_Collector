@@ -12,10 +12,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateCollectionRequest struct {
-	Name string `json:"name"`
-}
-
+// ListCollectionsHandler - Lists all collections for a user
+//
+//	@Summary		List all collections for a user
+//	@Description	List all collections for a user
+//	@Tags			Collection
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	types.ListCollectionsResponse
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/collection [get]
 func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 	token := r.Context().Value(types.JwtTokenKey).(string)
@@ -39,6 +45,17 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+// GetCollectionHandler - Gets a collection for a user
+//
+//	@Summary		Get a collection for a user
+//	@Description	Get a collection for a user by ID
+//	@Tags			Collection
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Collection ID"
+//	@Success		200	{object}	types.Collection
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/collection/{id} [get]
 func (s *Server) GetCollection(w http.ResponseWriter, r *http.Request) {
 	collection := r.Context().Value(types.CollectionData).(types.Collection)
 
@@ -51,8 +68,19 @@ func (s *Server) GetCollection(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+// CreateCollectionHandler - Creates a collection for a user
+//
+//	@Summary		Create a collection for a user
+//	@Description	Create a collection for a user
+//	@Tags			Collection
+//	@Accept			json
+//	@Produce		json
+//	@Param			createCollectionRequest	body		types.CreateCollectionRequest	true	"Create collection request"
+//	@Success		200	{object}	types.Collection
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/collection [post]
 func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
-	var createCollectionRequest CreateCollectionRequest
+	var createCollectionRequest types.CreateCollectionRequest
 	err := json.NewDecoder(r.Body).Decode(&createCollectionRequest)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
@@ -88,10 +116,33 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+// UpdateCollectionHandler - Updates a collection for a user
+//
+//	@Summary		Update a collection for a user
+//	@Description	Update a collection for a user by ID
+//	@Tags			Collection
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Collection ID"
+//	@Param			updateCollectionRequest	body		types.UpdateCollectionRequest	true	"Update collection request"
+//	@Success		200	{object}	types.Collection
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/collection/{id} [put]
 func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// DeleteCollectionHandler - Deletes a collection for a user
+//
+//	@Summary		Delete a collection for a user
+//	@Description	Delete a collection for a user by ID
+//	@Tags			Collection
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Collection ID"
+//	@Success		200	{object}	types.Collection
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/collection/{id} [delete]
 func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request) {
 
 }

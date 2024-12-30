@@ -1,8 +1,33 @@
 definitions:
+  types.Collection:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  types.CreateCollectionRequest:
+    properties:
+      name:
+        type: string
+    type: object
   types.ErrorResponse:
     properties:
       error:
         type: string
+    type: object
+  types.ListCollectionsResponse:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.Collection'
+        type: array
     type: object
   types.LoginRequest:
     properties:
@@ -37,9 +62,137 @@ definitions:
       email:
         type: string
     type: object
+  types.UpdateCollectionRequest:
+    properties:
+      name:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /collection:
+    get:
+      consumes:
+      - application/json
+      description: List all collections for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ListCollectionsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List all collections for a user
+      tags:
+      - Collection
+    post:
+      consumes:
+      - application/json
+      description: Create a collection for a user
+      parameters:
+      - description: Create collection request
+        in: body
+        name: createCollectionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateCollectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create a collection for a user
+      tags:
+      - Collection
+  /collection/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a collection for a user by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete a collection for a user
+      tags:
+      - Collection
+    get:
+      consumes:
+      - application/json
+      description: Get a collection for a user by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get a collection for a user
+      tags:
+      - Collection
+    put:
+      consumes:
+      - application/json
+      description: Update a collection for a user by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update collection request
+        in: body
+        name: updateCollectionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateCollectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update a collection for a user
+      tags:
+      - Collection
   /login:
     post:
       consumes:
