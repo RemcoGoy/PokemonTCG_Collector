@@ -4,6 +4,35 @@
         "contact": {}
     },
     "paths": {
+        "/card": {
+            "get": {
+                "description": "List all cards for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Card"
+                ],
+                "summary": "List all cards for a user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.ListCardsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/collection": {
             "get": {
                 "description": "List all collections for a user",
@@ -330,6 +359,20 @@
         }
     },
     "definitions": {
+        "types.Card": {
+            "type": "object",
+            "properties": {
+                "collection_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "types.Collection": {
             "type": "object",
             "properties": {
@@ -360,6 +403,20 @@
             "properties": {
                 "error": {
                     "type": "string"
+                }
+            }
+        },
+        "types.ListCardsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Card"
+                    }
                 }
             }
         },

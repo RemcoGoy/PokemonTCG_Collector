@@ -1,4 +1,13 @@
 definitions:
+  types.Card:
+    properties:
+      collection_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+    type: object
   types.Collection:
     properties:
       created_at:
@@ -19,6 +28,15 @@ definitions:
     properties:
       error:
         type: string
+    type: object
+  types.ListCardsResponse:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.Card'
+        type: array
     type: object
   types.ListCollectionsResponse:
     properties:
@@ -70,6 +88,25 @@ definitions:
 info:
   contact: {}
 paths:
+  /card:
+    get:
+      consumes:
+      - application/json
+      description: List all cards for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ListCardsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List all cards for a user
+      tags:
+      - Card
   /collection:
     get:
       consumes:

@@ -58,6 +58,14 @@ func (m *MockDbConnector) DeleteCollection(id string, userID string, token strin
 	return nil
 }
 
+func (m *MockDbConnector) GetCard(id string, userID string, token string) (types.Card, error) {
+	return types.Card{}, nil
+}
+
+func (m *MockDbConnector) ListCards(userID string, token string) ([]types.Card, int64, error) {
+	return []types.Card{}, 0, nil
+}
+
 // Not Found Db Connector
 
 type NotFoundDbConnector struct {

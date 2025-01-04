@@ -42,6 +42,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Use(m.CheckJwtToken)
 		r.Mount("/user", UserRouter(s))
 		r.Mount("/collection", CollectionRouter(s))
+		r.Mount("/card", CardRouter(s))
 	})
 
 	return r

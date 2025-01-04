@@ -28,3 +28,8 @@ type ListCollectionsResponse struct {
 	ListResponse
 	Data []Collection `json:"data"`
 }
+
+type ListCardsResponse struct {
+	ListResponse
+	Data []Card `json:"data"`
+}
