@@ -42,6 +42,82 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Create a card for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Card"
+                ],
+                "summary": "Create a card for a user",
+                "parameters": [
+                    {
+                        "description": "Create Card Request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.CreateCardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/card/{id}": {
+            "get": {
+                "description": "Get a card for a user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Card"
+                ],
+                "summary": "Get a card for a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/collection": {
@@ -381,6 +457,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "tcg_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -397,6 +479,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.CreateCardRequest": {
+            "type": "object",
+            "properties": {
+                "collection_id": {
+                    "type": "string"
+                },
+                "tcg_id": {
                     "type": "string"
                 }
             }

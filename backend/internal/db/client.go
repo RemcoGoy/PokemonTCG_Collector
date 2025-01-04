@@ -23,6 +23,7 @@ type DbConnectorInterface interface {
 	DeleteCollection(id string, userID string, token string) error
 
 	// Card
+	CreateCard(card types.Card, token string) (types.Card, error)
 	GetCard(id string, userID string, token string) (types.Card, error)
 	ListCards(userID string, token string) ([]types.Card, int64, error)
 }

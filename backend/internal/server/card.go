@@ -6,8 +6,10 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 // ListCardsHandler - Lists all cards for a user
@@ -43,9 +45,72 @@ func (s *Server) ListCards(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
-func (s *Server) GetCard(w http.ResponseWriter, r *http.Request) {}
+// GetCardHandler - Gets a card for a user
+//
+//	@Summary		Get a card for a user
+//	@Description	Get a card for a user by ID
+//	@Tags			Card
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Card ID"
+//	@Success		200	{object}	types.Card
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/card/{id} [get]
+func (s *Server) GetCard(w http.ResponseWriter, r *http.Request) {
+	card := r.Context().Value(types.CardData).(types.Card)
 
-func (s *Server) CreateCard(w http.ResponseWriter, r *http.Request) {}
+	jsonResp, err := json.Marshal(card)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
+}
+
+// CreateCardHandler - Creates a card for a user
+//
+//	@Summary		Create a card for a user
+//	@Description	Create a card for a user
+//	@Tags			Card
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		types.CreateCardRequest	true	"Create Card Request"
+//	@Success		200		{object}	types.Card
+//	@Failure		400		{object}	types.ErrorResponse
+//	@Router			/card [post]
+func (s *Server) CreateCard(w http.ResponseWriter, r *http.Request) {
+	var createCardRequest types.CreateCardRequest
+	err := json.NewDecoder(r.Body).Decode(&createCardRequest)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	token := r.Context().Value(types.JwtTokenKey).(string)
+	userID := r.Context().Value(types.UserID).(string)
+
+	card := types.Card{
+		ID:           uuid.New(),
+		CreatedAt:    time.Now(),
+		CollectionID: uuid.MustParse(createCardRequest.CollectionID),
+		TCGID:        createCardRequest.TCGID,
+		UserID:       uuid.MustParse(userID),
+	}
+	card, err = s.DbConnector.CreateCard(card, token)
+	if err != nil {
+		utils.JSONError(w, "error creating card", http.StatusBadRequest)
+		return
+	}
+
+	jsonResp, err := json.Marshal(card)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
+}
 
 func (s *Server) UpdateCard(w http.ResponseWriter, r *http.Request) {}
 

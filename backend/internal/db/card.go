@@ -39,3 +39,19 @@ func (d *DbConnector) ListCards(userID string, token string) ([]types.Card, int6
 
 	return cards, count, nil
 }
+
+func (d *DbConnector) CreateCard(card types.Card, token string) (types.Card, error) {
+	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
+	data, _, err := sb_client.From("card").Insert(card, false, "", "", "exact").Execute()
+	if err != nil {
+		return types.Card{}, err
+	}
+
+	var c []types.Card
+	err = json.Unmarshal(data, &c)
+	if err != nil {
+		return types.Card{}, err
+	}
+
+	return c[0], nil
+}

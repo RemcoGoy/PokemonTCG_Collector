@@ -66,6 +66,10 @@ func (m *MockDbConnector) ListCards(userID string, token string) ([]types.Card, 
 	return []types.Card{}, 0, nil
 }
 
+func (m *MockDbConnector) CreateCard(card types.Card, token string) (types.Card, error) {
+	return types.Card{}, nil
+}
+
 // Not Found Db Connector
 
 type NotFoundDbConnector struct {

@@ -7,6 +7,10 @@ definitions:
         type: string
       id:
         type: string
+      tcg_id:
+        type: string
+      user_id:
+        type: string
     type: object
   types.Collection:
     properties:
@@ -17,6 +21,13 @@ definitions:
       name:
         type: string
       user_id:
+        type: string
+    type: object
+  types.CreateCardRequest:
+    properties:
+      collection_id:
+        type: string
+      tcg_id:
         type: string
     type: object
   types.CreateCollectionRequest:
@@ -105,6 +116,56 @@ paths:
           schema:
             $ref: '#/definitions/types.ErrorResponse'
       summary: List all cards for a user
+      tags:
+      - Card
+    post:
+      consumes:
+      - application/json
+      description: Create a card for a user
+      parameters:
+      - description: Create Card Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create a card for a user
+      tags:
+      - Card
+  /card/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a card for a user by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get a card for a user
       tags:
       - Card
   /collection:
