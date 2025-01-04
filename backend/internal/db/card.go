@@ -73,5 +73,11 @@ func (d *DbConnector) UpdateCard(id string, update types.UpdateCardRequest, toke
 }
 
 func (d *DbConnector) DeleteCard(id string, userID string, token string) error {
+	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
+	_, _, err := sb_client.From("card").Delete("", "exact").Eq("id", id).Eq("user_id", userID).Execute()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

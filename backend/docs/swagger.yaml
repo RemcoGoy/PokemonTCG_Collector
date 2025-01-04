@@ -151,6 +151,30 @@ paths:
       tags:
       - Card
   /card/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a card for a user by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete a card for a user
+      tags:
+      - Card
     get:
       consumes:
       - application/json

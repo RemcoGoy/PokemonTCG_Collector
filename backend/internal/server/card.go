@@ -154,7 +154,35 @@ func (s *Server) UpdateCard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
-func (s *Server) DeleteCard(w http.ResponseWriter, r *http.Request) {}
+// DeleteCardHandler - Deletes a card for a user
+//
+//	@Summary		Delete a card for a user
+//	@Description	Delete a card for a user by ID
+//	@Tags			Card
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Card ID"
+//	@Success		200	{object}	types.Card
+//	@Failure		400	{object}	types.ErrorResponse
+//	@Router			/card/{id} [delete]
+func (s *Server) DeleteCard(w http.ResponseWriter, r *http.Request) {
+	card := r.Context().Value(types.CardData).(types.Card)
+	token := r.Context().Value(types.JwtTokenKey).(string)
+
+	err := s.DbConnector.DeleteCard(card.ID.String(), card.UserID.String(), token)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	jsonResp, err := json.Marshal(card)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
+}
 
 func (s *Server) CardCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
