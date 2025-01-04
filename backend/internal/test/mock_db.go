@@ -36,15 +36,18 @@ func (m *MockDbConnector) CreateCollection(collection types.Collection, token st
 	}, nil
 }
 
-func (m *MockDbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {
-	return types.Collection{
-		ID:   uuid.MustParse(COLLECTION_ID),
-		Name: COLLECTION_NAME,
+func (m *MockDbConnector) GetCollection(id string, userID string, token string) (types.CollectionWithCards, error) {
+	return types.CollectionWithCards{
+		Collection: types.Collection{
+			ID:   uuid.MustParse(COLLECTION_ID),
+			Name: COLLECTION_NAME,
+		},
+		Card: []types.Card{},
 	}, nil
 }
 
-func (m *MockDbConnector) ListCollections(userID string, token string) ([]types.Collection, int64, error) {
-	return []types.Collection{}, 0, nil
+func (m *MockDbConnector) ListCollections(userID string, token string) ([]types.CollectionWithCards, int64, error) {
+	return []types.CollectionWithCards{}, 0, nil
 }
 
 func (m *MockDbConnector) UpdateCollection(id string, update types.UpdateCollectionRequest, token string) (types.Collection, error) {
@@ -88,8 +91,8 @@ func NewNotFoundDbConnector() *NotFoundDbConnector {
 	return &NotFoundDbConnector{}
 }
 
-func (m *NotFoundDbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {
-	return types.Collection{}, errors.New("collection not found")
+func (m *NotFoundDbConnector) GetCollection(id string, userID string, token string) (types.CollectionWithCards, error) {
+	return types.CollectionWithCards{}, errors.New("collection not found")
 }
 
 // Duplicate Db Connector

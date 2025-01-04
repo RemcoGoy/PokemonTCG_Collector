@@ -17,8 +17,8 @@ type DbConnectorInterface interface {
 	// Collection
 	AdminCreateCollection(collection types.Collection) error
 	CreateCollection(collection types.Collection, token string) (types.Collection, error)
-	GetCollection(id string, userID string, token string) (types.Collection, error)
-	ListCollections(userID string, token string) ([]types.Collection, int64, error)
+	GetCollection(id string, userID string, token string) (types.CollectionWithCards, error)
+	ListCollections(userID string, token string) ([]types.CollectionWithCards, int64, error)
 	UpdateCollection(id string, update types.UpdateCollectionRequest, token string) (types.Collection, error)
 	DeleteCollection(id string, userID string, token string) error
 

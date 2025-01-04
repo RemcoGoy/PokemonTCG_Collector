@@ -58,7 +58,7 @@ func (s *Server) ListCollections(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	types.ErrorResponse
 //	@Router			/collection/{id} [get]
 func (s *Server) GetCollection(w http.ResponseWriter, r *http.Request) {
-	collection := r.Context().Value(types.CollectionData).(types.Collection)
+	collection := r.Context().Value(types.CollectionData).(types.CollectionWithCards)
 
 	jsonResp, err := json.Marshal(collection)
 	if err != nil {
@@ -130,7 +130,7 @@ func (s *Server) CreateCollection(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400						{object}	types.ErrorResponse
 //	@Router			/collection/{id} [put]
 func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request) {
-	prevCollection := r.Context().Value(types.CollectionData).(types.Collection)
+	prevCollection := r.Context().Value(types.CollectionData).(types.CollectionWithCards)
 	token := r.Context().Value(types.JwtTokenKey).(string)
 
 	var updateCollectionRequest types.UpdateCollectionRequest
@@ -168,7 +168,7 @@ func (s *Server) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 //	@Failure		400	{object}	types.ErrorResponse
 //	@Router			/collection/{id} [delete]
 func (s *Server) DeleteCollection(w http.ResponseWriter, r *http.Request) {
-	collection := r.Context().Value(types.CollectionData).(types.Collection)
+	collection := r.Context().Value(types.CollectionData).(types.CollectionWithCards)
 	token := r.Context().Value(types.JwtTokenKey).(string)
 
 	err := s.DbConnector.DeleteCollection(collection.ID.String(), collection.UserID.String(), token)

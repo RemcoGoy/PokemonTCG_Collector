@@ -23,40 +23,40 @@ func (d *DbConnector) CreateCollection(collection types.Collection, token string
 		return types.Collection{}, err
 	}
 
-	var c types.Collection
+	var c []types.Collection
 	err = json.Unmarshal(data, &c)
 	if err != nil {
 		return types.Collection{}, err
 	}
 
-	return c, nil
+	return c[0], nil
 }
 
-func (d *DbConnector) GetCollection(id string, userID string, token string) (types.Collection, error) {
+func (d *DbConnector) GetCollection(id string, userID string, token string) (types.CollectionWithCards, error) {
 	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
-	data, count, err := sb_client.From("collection").Select("*", "exact", false).Eq("user_id", userID).Eq("id", id).Execute()
+	data, count, err := sb_client.From("collection").Select("*, card(*)", "exact", false).Eq("user_id", userID).Eq("id", id).Execute()
 	if err != nil || count == 0 {
-		return types.Collection{}, errors.New("collection not found")
+		return types.CollectionWithCards{}, errors.New("collection not found")
 	}
 
-	var collections []types.Collection
+	var collections []types.CollectionWithCards
 	err = json.Unmarshal(data, &collections)
 	if err != nil {
-		return types.Collection{}, err
+		return types.CollectionWithCards{}, err
 	}
 
 	return collections[0], nil
 }
 
-func (d *DbConnector) ListCollections(userID string, token string) ([]types.Collection, int64, error) {
+func (d *DbConnector) ListCollections(userID string, token string) ([]types.CollectionWithCards, int64, error) {
 	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
 
-	data, count, err := sb_client.From("collection").Select("*", "exact", false).Eq("user_id", userID).Execute()
+	data, count, err := sb_client.From("collection").Select("*, card(*)", "exact", false).Eq("user_id", userID).Execute()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	var collections []types.Collection
+	var collections []types.CollectionWithCards
 	err = json.Unmarshal(data, &collections)
 	if err != nil {
 		return nil, 0, err

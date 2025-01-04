@@ -12,3 +12,8 @@ type Collection struct {
 	Name      string    `json:"name"`
 	UserID    uuid.UUID `json:"user_id"`
 }
+
+type CollectionWithCards struct {
+	Collection
+	Card []Card `json:"card"`
+}
