@@ -107,6 +107,51 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Update a card for a user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Card"
+                ],
+                "summary": "Update a card for a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Card Request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateCardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/collection": {
@@ -575,6 +620,17 @@
             "type": "object",
             "properties": {
                 "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.UpdateCardRequest": {
+            "type": "object",
+            "properties": {
+                "collection_id": {
+                    "type": "string"
+                },
+                "tcg_id": {
                     "type": "string"
                 }
             }

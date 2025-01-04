@@ -70,6 +70,14 @@ func (m *MockDbConnector) CreateCard(card types.Card, token string) (types.Card,
 	return types.Card{}, nil
 }
 
+func (m *MockDbConnector) UpdateCard(id string, update types.UpdateCardRequest, token string) (types.Card, error) {
+	return types.Card{}, nil
+}
+
+func (m *MockDbConnector) DeleteCard(id string, userID string, token string) error {
+	return nil
+}
+
 // Not Found Db Connector
 
 type NotFoundDbConnector struct {

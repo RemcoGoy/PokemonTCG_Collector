@@ -23,3 +23,8 @@ type CreateCardRequest struct {
 	CollectionID string `json:"collection_id"`
 	TCGID        string `json:"tcg_id"`
 }
+
+type UpdateCardRequest struct {
+	CollectionID string `json:"collection_id"`
+	TCGID        string `json:"tcg_id"`
+}

@@ -112,7 +112,47 @@ func (s *Server) CreateCard(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
-func (s *Server) UpdateCard(w http.ResponseWriter, r *http.Request) {}
+// UpdateCardHandler - Updates a card for a user
+//
+//	@Summary		Update a card for a user
+//	@Description	Update a card for a user by ID
+//	@Tags			Card
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string					true	"Card ID"
+//	@Param			body	body		types.UpdateCardRequest	true	"Update Card Request"
+//	@Success		200		{object}	types.Card
+//	@Failure		400		{object}	types.ErrorResponse
+//	@Router			/card/{id} [put]
+func (s *Server) UpdateCard(w http.ResponseWriter, r *http.Request) {
+	prevCard := r.Context().Value(types.CardData).(types.Card)
+	token := r.Context().Value(types.JwtTokenKey).(string)
+
+	var updateCardRequest types.UpdateCardRequest
+	err := json.NewDecoder(r.Body).Decode(&updateCardRequest)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if updateCardRequest.CollectionID == "" {
+		updateCardRequest.CollectionID = prevCard.CollectionID.String()
+	}
+
+	newCard, err := s.DbConnector.UpdateCard(prevCard.ID.String(), updateCardRequest, token)
+	if err != nil {
+		utils.JSONError(w, "error updating card", http.StatusBadRequest)
+		return
+	}
+
+	jsonResp, err := json.Marshal(newCard)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(jsonResp)
+}
 
 func (s *Server) DeleteCard(w http.ResponseWriter, r *http.Request) {}
 

@@ -91,6 +91,13 @@ definitions:
       email:
         type: string
     type: object
+  types.UpdateCardRequest:
+    properties:
+      collection_id:
+        type: string
+      tcg_id:
+        type: string
+    type: object
   types.UpdateCollectionRequest:
     properties:
       name:
@@ -166,6 +173,36 @@ paths:
           schema:
             $ref: '#/definitions/types.ErrorResponse'
       summary: Get a card for a user
+      tags:
+      - Card
+    put:
+      consumes:
+      - application/json
+      description: Update a card for a user by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Card Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update a card for a user
       tags:
       - Card
   /collection:

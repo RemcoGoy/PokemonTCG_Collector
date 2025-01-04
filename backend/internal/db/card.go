@@ -55,3 +55,23 @@ func (d *DbConnector) CreateCard(card types.Card, token string) (types.Card, err
 
 	return c[0], nil
 }
+
+func (d *DbConnector) UpdateCard(id string, update types.UpdateCardRequest, token string) (types.Card, error) {
+	sb_client := d.supabaseFactory.CreateAuthenticatedClient(token)
+	data, _, err := sb_client.From("card").Update(update, "", "exact").Eq("id", id).Execute()
+	if err != nil {
+		return types.Card{}, err
+	}
+
+	var c []types.Card
+	err = json.Unmarshal(data, &c)
+	if err != nil {
+		return types.Card{}, err
+	}
+
+	return c[0], nil
+}
+
+func (d *DbConnector) DeleteCard(id string, userID string, token string) error {
+	return nil
+}
