@@ -33,3 +33,7 @@ type ListCardsResponse struct {
 	ListResponse
 	Data []Card `json:"data"`
 }
+
+type ScanResponse struct {
+	Path string `json:"path"`
+}

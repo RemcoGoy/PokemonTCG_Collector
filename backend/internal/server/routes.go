@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/go-chi/render"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	_ "backend/docs"
@@ -20,7 +19,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.SetHeader("Content-Type", "application/json"))
-	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
@@ -43,6 +41,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		r.Mount("/user", UserRouter(s))
 		r.Mount("/collection", CollectionRouter(s))
 		r.Mount("/card", CardRouter(s))
+		r.Mount("/scan", ScanRouter(s))
 	})
 
 	return r
