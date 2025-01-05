@@ -1,0 +1,445 @@
+definitions:
+  types.Card:
+    properties:
+      collection_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      tcg_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  types.Collection:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  types.CreateCardRequest:
+    properties:
+      collection_id:
+        type: string
+      tcg_id:
+        type: string
+    type: object
+  types.CreateCollectionRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  types.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  types.ListCardsResponse:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.Card'
+        type: array
+    type: object
+  types.ListCollectionsResponse:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.Collection'
+        type: array
+    type: object
+  types.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  types.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  types.LogoutResponse:
+    type: object
+  types.OkResponse:
+    properties:
+      ok:
+        type: boolean
+    type: object
+  types.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  types.RegisterResponse:
+    properties:
+      email:
+        type: string
+    type: object
+  types.UpdateCardRequest:
+    properties:
+      collection_id:
+        type: string
+      tcg_id:
+        type: string
+    type: object
+  types.UpdateCollectionRequest:
+    properties:
+      name:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /card:
+    get:
+      consumes:
+      - application/json
+      description: List all cards for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ListCardsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List all cards for a user
+      tags:
+      - Card
+    post:
+      consumes:
+      - application/json
+      description: Create a card for a user
+      parameters:
+      - description: Create Card Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create a card for a user
+      tags:
+      - Card
+  /card/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a card for a user by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete a card for a user
+      tags:
+      - Card
+    get:
+      consumes:
+      - application/json
+      description: Get a card for a user by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get a card for a user
+      tags:
+      - Card
+    put:
+      consumes:
+      - application/json
+      description: Update a card for a user by ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Card Request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Card'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update a card for a user
+      tags:
+      - Card
+  /collection:
+    get:
+      consumes:
+      - application/json
+      description: List all collections for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ListCollectionsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List all collections for a user
+      tags:
+      - Collection
+    post:
+      consumes:
+      - application/json
+      description: Create a collection for a user
+      parameters:
+      - description: Create collection request
+        in: body
+        name: createCollectionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.CreateCollectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create a collection for a user
+      tags:
+      - Collection
+  /collection/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a collection for a user by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete a collection for a user
+      tags:
+      - Collection
+    get:
+      consumes:
+      - application/json
+      description: Get a collection for a user by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get a collection for a user
+      tags:
+      - Collection
+    put:
+      consumes:
+      - application/json
+      description: Update a collection for a user by ID
+      parameters:
+      - description: Collection ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update collection request
+        in: body
+        name: updateCollectionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateCollectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Collection'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update a collection for a user
+      tags:
+      - Collection
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Log a user in by email and password
+      parameters:
+      - description: Login request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Login a user
+      tags:
+      - Auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Log a user out
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.LogoutResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Logout a user
+      tags:
+      - Auth
+  /ok:
+    get:
+      consumes:
+      - application/json
+      description: Tells if the API is working or not.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.OkResponse'
+      summary: This API can be used as health check for this application.
+      tags:
+      - Health
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Sign up a user by email, password and username
+      parameters:
+      - description: Register request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/types.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Signup a user
+      tags:
+      - Auth
+swagger: "2.0"
