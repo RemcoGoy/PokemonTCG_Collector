@@ -61,3 +61,23 @@ func PhashImage(file multipart.File, header *multipart.FileHeader) (string, erro
 
 	return hash.ToString(), nil
 }
+
+func hammingDistance(s1, s2 string) int {
+	if len(s1) != len(s2) {
+		panic("strings must be of equal length")
+	}
+
+	distance := 0
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			distance++
+		}
+	}
+
+	return distance
+}
+
+func HashDistance(hash1, hash2 string) int {
+	distance := hammingDistance(hash1, hash2)
+	return distance
+}

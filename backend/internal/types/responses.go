@@ -35,5 +35,6 @@ type ListCardsResponse struct {
 }
 
 type ScanResponse struct {
-	Hash string `json:"hash"`
+	Hash     string `json:"hash"`
+	Distance int    `json:"distance"`
 }
