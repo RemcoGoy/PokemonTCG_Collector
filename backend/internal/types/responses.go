@@ -35,5 +35,5 @@ type ListCardsResponse struct {
 }
 
 type ScanResponse struct {
-	Path string `json:"path"`
+	Hash string `json:"hash"`
 }

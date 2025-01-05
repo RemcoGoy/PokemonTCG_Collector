@@ -20,12 +20,18 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Form fields available: %v\n", r.MultipartForm.File)
 
-	file, _, err := r.FormFile("card.png") // TODO: change this, but there's a bug in Scalar
+	file, header, err := r.FormFile("card.png") // TODO: change this, but there's a bug in Scalar
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
+
+	resp.Hash, err = utils.PhashImage(file, header)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
