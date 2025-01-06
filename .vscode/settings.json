@@ -4,4 +4,8 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "golang.go"
     },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    }
 }
