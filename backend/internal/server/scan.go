@@ -16,7 +16,7 @@ import (
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Param			card	formData	file	true	"Card image"
-//	@Success		200		{object}	tcg.PokemonCard
+//	@Success		200		{object}	types.ScanResponse
 //	@Failure		400		{object}	types.ErrorResponse
 //	@Router			/scan [post]
 func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {

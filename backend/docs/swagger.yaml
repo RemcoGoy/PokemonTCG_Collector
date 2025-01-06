@@ -93,8 +93,30 @@ definitions:
     type: object
   types.ScanResponse:
     properties:
-      tcg_id:
+      evolves_from:
         type: string
+      evolves_to:
+        items:
+          type: string
+        type: array
+      hp:
+        type: string
+      id:
+        type: string
+      level:
+        type: string
+      name:
+        type: string
+      subtypes:
+        items:
+          type: string
+        type: array
+      supertype:
+        type: string
+      types:
+        items:
+          type: string
+        type: array
     type: object
   types.UpdateCardRequest:
     properties:
