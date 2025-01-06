@@ -9,6 +9,17 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// ScanHandler - Scans a card and returns the TCGID
+//
+//	@Summary		Scans a card and returns the TCGID
+//	@Description	Scans a card and returns the TCGID
+//	@Tags			Scan
+//	@Accept			multipart/form-data
+//	@Produce		json
+//	@Param			card	formData	file	true	"Card image"
+//	@Success		200		{object}	types.ScanResponse
+//	@Failure		400		{object}	types.ErrorResponse
+//	@Router			/scan [post]
 func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 	resp := types.ScanResponse{}
 
@@ -36,8 +47,7 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp.Hash = hash.ToString()
-	resp.CardHash = card
+	resp.TCGID = card.TCGID
 
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {

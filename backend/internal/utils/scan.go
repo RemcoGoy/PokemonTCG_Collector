@@ -2,8 +2,6 @@ package utils
 
 import (
 	"backend/internal/types"
-	"bufio"
-	"bytes"
 	"encoding/binary"
 	"encoding/csv"
 	"encoding/hex"
@@ -100,15 +98,6 @@ func FindClosestCard(hash *goimagehash.ExtImageHash) (types.CardHash, error) {
 	if err != nil {
 		return types.CardHash{}, fmt.Errorf("failed to read card hashes: %v", err)
 	}
-
-	var b bytes.Buffer
-	foo := bufio.NewWriter(&b)
-	_ = hash.Dump(foo)
-	foo.Flush()
-	bar := bufio.NewReader(&b)
-	hash2, _ := goimagehash.LoadExtImageHash(bar)
-
-	fmt.Println("hash2:", hash2.ToString())
 
 	// Find closest match by calculating hamming distance
 	minDistance := -1

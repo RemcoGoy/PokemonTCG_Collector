@@ -35,6 +35,5 @@ type ListCardsResponse struct {
 }
 
 type ScanResponse struct {
-	Hash     string   `json:"hash"`
-	CardHash CardHash `json:"card_hash"`
+	TCGID string `json:"tcg_id"`
 }
