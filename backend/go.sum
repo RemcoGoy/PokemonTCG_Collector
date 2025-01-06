@@ -1,5 +1,7 @@
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
+github.com/PokemonTCG/pokemon-tcg-sdk-go-v2 v0.1.1 h1:Y77cb7++XBl3H9raEW6p/MNzRHgpXeK+dNh1OV8NOw0=
+github.com/PokemonTCG/pokemon-tcg-sdk-go-v2 v0.1.1/go.mod h1:kAcPMm0IbuQMaDLtQ+aWrkeJyX8CAcR4I5AyIglC1vY=
 github.com/ajg/form v1.5.1 h1:t9c7v8JUKu/XxOGBU0yjNpaMloxGEJhUkqFRq0ibGeU=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
 github.com/corona10/goimagehash v1.1.0 h1:teNMX/1e+Wn/AYSbLHX8mj+mF9r60R1kBeqE9MkoYwI=

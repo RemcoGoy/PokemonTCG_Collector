@@ -1,7 +1,6 @@
 package server
 
 import (
-	"backend/internal/types"
 	"backend/internal/utils"
 	"encoding/json"
 	"net/http"
@@ -17,18 +16,16 @@ import (
 //	@Accept			multipart/form-data
 //	@Produce		json
 //	@Param			card	formData	file	true	"Card image"
-//	@Success		200		{object}	types.ScanResponse
+//	@Success		200		{object}	tcg.PokemonCard
 //	@Failure		400		{object}	types.ErrorResponse
 //	@Router			/scan [post]
 func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
-	resp := types.ScanResponse{}
-
 	if err := r.ParseMultipartForm(200 << 20); err != nil { // 200 MB max memory
 		utils.JSONError(w, "File too large", http.StatusBadRequest)
 		return
 	}
 
-	file, header, err := r.FormFile("card.png") // TODO: change this, but there's a bug in Scalar
+	file, header, err := r.FormFile("card.jpg") // TODO: change this, but there's a bug in Scalar
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -41,15 +38,19 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	card, err := utils.FindClosestCard(hash)
+	cardHash, err := utils.FindClosestCard(hash)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	resp.TCGID = card.TCGID
+	card, err := utils.GetCardData(cardHash.TCGID, s.TcgClient)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	jsonResp, err := json.Marshal(resp)
+	jsonResp, err := json.Marshal(card)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return

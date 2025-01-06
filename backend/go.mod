@@ -17,6 +17,7 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/PokemonTCG/pokemon-tcg-sdk-go-v2 v0.1.1 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/corona10/goimagehash v1.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect

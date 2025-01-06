@@ -33,7 +33,3 @@ type ListCardsResponse struct {
 	ListResponse
 	Data []Card `json:"data"`
 }
-
-type ScanResponse struct {
-	TCGID string `json:"tcg_id"`
-}
