@@ -25,7 +25,7 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, header, err := r.FormFile("card.jpg") // TODO: change this, but there's a bug in Scalar
+	file, header, err := r.FormFile("card")
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
