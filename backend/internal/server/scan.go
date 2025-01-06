@@ -4,7 +4,6 @@ import (
 	"backend/internal/types"
 	"backend/internal/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -18,8 +17,6 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Form fields available: %v\n", r.MultipartForm.File)
-
 	file, header, err := r.FormFile("card.png") // TODO: change this, but there's a bug in Scalar
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
@@ -27,15 +24,24 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	resp.Hash, err = utils.PhashImage(file, header)
+	hash, err := utils.PhashImage(file, header)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	card, err := utils.FindClosestCard(hash)
+	if err != nil {
+		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp.Hash = hash.ToString()
+	resp.CardHash = card
+
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

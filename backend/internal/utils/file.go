@@ -2,15 +2,10 @@ package utils
 
 import (
 	"fmt"
-	"image"
-	"image/jpeg"
-	"image/png"
 	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
-
-	"github.com/corona10/goimagehash"
 )
 
 func SaveFile(file *multipart.File, header *multipart.FileHeader) (string, error) {
@@ -36,48 +31,4 @@ func SaveFile(file *multipart.File, header *multipart.FileHeader) (string, error
 	}
 
 	return filePath, nil
-}
-
-func PhashImage(file multipart.File, header *multipart.FileHeader) (string, error) {
-	// Decode image
-	var img image.Image
-	var err error
-	if header.Header.Get("Content-Type") == "image/png" {
-		img, err = png.Decode(file)
-	} else if header.Header.Get("Content-Type") == "image/jpeg" {
-		img, err = jpeg.Decode(file)
-	} else {
-		return "", fmt.Errorf("unsupported image format: %v", header.Header.Get("Content-Type"))
-	}
-	if err != nil {
-		return "", fmt.Errorf("failed to decode image: %v", err)
-	}
-
-	// Calculate perceptual hash
-	hash, err := goimagehash.PerceptionHash(img)
-	if err != nil {
-		return "", fmt.Errorf("failed to calculate phash: %v", err)
-	}
-
-	return hash.ToString(), nil
-}
-
-func hammingDistance(s1, s2 string) int {
-	if len(s1) != len(s2) {
-		panic("strings must be of equal length")
-	}
-
-	distance := 0
-	for i := range s1 {
-		if s1[i] != s2[i] {
-			distance++
-		}
-	}
-
-	return distance
-}
-
-func HashDistance(hash1, hash2 string) int {
-	distance := hammingDistance(hash1, hash2)
-	return distance
 }

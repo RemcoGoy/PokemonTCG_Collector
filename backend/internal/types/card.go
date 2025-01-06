@@ -13,3 +13,12 @@ type Card struct {
 	TCGID        string    `json:"tcg_id"`
 	UserID       uuid.UUID `json:"user_id"`
 }
+
+type CardHash struct {
+	ID         string `json:"id"`
+	Perceptual string `json:"perceptual"`
+	Difference string `json:"difference"`
+	Wavelet    string `json:"wavelet"`
+	Color      string `json:"color"`
+	TCGID      string `json:"tcg_id"`
+}
