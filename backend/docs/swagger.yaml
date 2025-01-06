@@ -91,6 +91,33 @@ definitions:
       email:
         type: string
     type: object
+  types.ScanResponse:
+    properties:
+      evolves_from:
+        type: string
+      evolves_to:
+        items:
+          type: string
+        type: array
+      hp:
+        type: string
+      id:
+        type: string
+      level:
+        type: string
+      name:
+        type: string
+      subtypes:
+        items:
+          type: string
+        type: array
+      supertype:
+        type: string
+      types:
+        items:
+          type: string
+        type: array
+    type: object
   types.UpdateCardRequest:
     properties:
       collection_id:
@@ -416,6 +443,31 @@ paths:
       summary: This API can be used as health check for this application.
       tags:
       - Health
+  /scan:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Scans a card and returns the TCGID
+      parameters:
+      - description: Card image
+        in: formData
+        name: card
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ScanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Scans a card and returns the TCGID
+      tags:
+      - Scan
   /signup:
     post:
       consumes:

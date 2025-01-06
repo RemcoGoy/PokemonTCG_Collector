@@ -10,12 +10,14 @@ import (
 	"backend/internal/db"
 	sb "backend/internal/supabase"
 
+	tcg "github.com/PokemonTCG/pokemon-tcg-sdk-go-v2/pkg"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type Server struct {
 	SupabaseFactory sb.SupabaseFactoryInterface
 	DbConnector     db.DbConnectorInterface
+	TcgClient       tcg.Client
 	port            int
 }
 
@@ -26,6 +28,7 @@ func NewServer() *http.Server {
 	NewServer := &Server{
 		SupabaseFactory: supabaseFactory,
 		DbConnector:     db.NewDbConnector(supabaseFactory),
+		TcgClient:       tcg.NewClient(os.Getenv("TCG_API_KEY")),
 		port:            port,
 	}
 

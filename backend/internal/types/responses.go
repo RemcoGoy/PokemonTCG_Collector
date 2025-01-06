@@ -33,3 +33,15 @@ type ListCardsResponse struct {
 	ListResponse
 	Data []Card `json:"data"`
 }
+
+type ScanResponse struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Supertype   string   `json:"supertype"`
+	Subtypes    []string `json:"subtypes"`
+	Level       string   `json:"level"`
+	HP          string   `json:"hp"`
+	Types       []string `json:"types"`
+	EvolvesFrom string   `json:"evolves_from"`
+	EvolvesTo   []string `json:"evolves_to"`
+}
