@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"image"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -63,56 +64,71 @@ func hashCards(page int, client tcg.Client) [][]string {
 
 	return hashes
 }
-
 func main() {
 	start := time.Now()
+	log.Println("Starting hash generation process...")
+
+	if err := os.Remove("./data/hashes.csv"); err != nil && !os.IsNotExist(err) {
+		log.Fatal("Error removing existing hashes.csv file:", err)
+	}
+	log.Println("Cleaned up any existing hashes.csv file")
 
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("Error loading .env file")
-		os.Exit(1)
+		log.Fatal("Error loading .env file:", err)
 	}
 	API_KEY := os.Getenv("TCG_API_KEY")
 	tcg_client := tcg.NewClient(API_KEY)
+	log.Println("Successfully loaded API key and created TCG client")
 
 	writer, err := createCsvWriter("./data/hashes.csv")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal("Error creating CSV writer:", err)
 	}
 	defer writer.Flush()
+	log.Println("Successfully created CSV writer")
 
 	numWorkers := 4
 	numPages := 10
 	jobs := make(chan int, numPages)
 	results := make(chan [][]string, numPages)
 
+	log.Printf("Starting %d workers to process %d pages...", numWorkers, numPages)
+
 	// Start workers
 	for w := 0; w < numWorkers; w++ {
-		go func() {
+		go func(workerId int) {
+			log.Printf("Worker %d started", workerId)
 			for page := range jobs {
+				log.Printf("Worker %d processing page %d", workerId, page)
 				hashes := hashCards(page, tcg_client)
 				results <- hashes
+				log.Printf("Worker %d completed page %d", workerId, page)
 			}
-		}()
+		}(w)
 	}
 
 	// Send jobs
+	log.Println("Sending jobs to workers...")
 	for page := 1; page <= numPages; page++ {
 		jobs <- page
 	}
 	close(jobs)
+	log.Println("All jobs sent to workers")
 
 	// Collect results
+	log.Println("Collecting results...")
 	var hashes [][]string
 	for i := 0; i < numPages; i++ {
 		pageHashes := <-results
 		hashes = append(hashes, pageHashes...)
+		log.Printf("Collected results for page %d", i+1)
 	}
 
+	log.Printf("Writing %d hash records to CSV...", len(hashes))
 	for _, hash := range hashes {
 		writeRecord(writer, hash)
 	}
 
 	elapsed := time.Since(start)
-	fmt.Printf("Processing took %s\n", elapsed)
+	log.Printf("Processing completed. Total time: %s", elapsed)
 }
