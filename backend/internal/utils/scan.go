@@ -128,12 +128,16 @@ func FindClosestCard(hash *goimagehash.ExtImageHash) (types.CardHash, error) {
 	return cardHashes[closestIdx], nil
 }
 
-func PhashImage(file multipart.File, header *multipart.FileHeader) (*goimagehash.ExtImageHash, error) {
+func PhashFile(file multipart.File, header *multipart.FileHeader) (*goimagehash.ExtImageHash, error) {
 	img, err := fileToImage(file, header)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert file to image: %v", err)
 	}
 
+	return PhashImage(img)
+}
+
+func PhashImage(img image.Image) (*goimagehash.ExtImageHash, error) {
 	// Calculate perceptual hash
 	hash, err := goimagehash.ExtPerceptionHash(img, PHASH_SIZE, PHASH_BLOCK_SIZE)
 	if err != nil {

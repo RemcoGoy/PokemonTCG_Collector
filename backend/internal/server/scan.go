@@ -32,7 +32,7 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	hash, err := utils.PhashImage(file, header)
+	hash, err := utils.PhashFile(file, header)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
