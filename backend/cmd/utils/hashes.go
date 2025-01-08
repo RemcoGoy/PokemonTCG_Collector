@@ -7,11 +7,11 @@ import (
 	"image"
 	"net/http"
 	"os"
+	"time"
 
 	tcg "github.com/PokemonTCG/pokemon-tcg-sdk-go-v2/pkg"
 	"github.com/PokemonTCG/pokemon-tcg-sdk-go-v2/pkg/request"
 	"github.com/joho/godotenv"
-	"github.com/schollz/progressbar/v3"
 )
 
 func createCsvWriter(filename string) (*csv.Writer, error) {
@@ -30,29 +30,13 @@ func writeRecord(writer *csv.Writer, record []string) {
 	}
 }
 
-func main() {
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("Error loading .env file")
-		os.Exit(1)
-	}
-
-	API_KEY := os.Getenv("TCG_API_KEY")
-	tcg_client := tcg.NewClient(API_KEY)
-
-	cards, err := tcg_client.GetCards(request.PageSize(10), request.Page(1))
+func hashCards(page int, client tcg.Client) [][]string {
+	cards, err := client.GetCards(request.OrderBy("set.releaseDate,number"), request.PageSize(10), request.Page(page))
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
 
-	bar := progressbar.Default(int64(len(cards)))
-
-	writer, err := createCsvWriter("./data/hashes.csv")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	defer writer.Flush()
+	hashes := [][]string{}
 
 	for _, card := range cards {
 		resp, err := http.Get(card.Images.Large)
@@ -74,7 +58,61 @@ func main() {
 			continue
 		}
 
-		writeRecord(writer, []string{card.ID, hash.ToString()})
-		bar.Add(1)
+		hashes = append(hashes, []string{card.ID, hash.ToString()})
 	}
+
+	return hashes
+}
+
+func main() {
+	start := time.Now()
+
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("Error loading .env file")
+		os.Exit(1)
+	}
+	API_KEY := os.Getenv("TCG_API_KEY")
+	tcg_client := tcg.NewClient(API_KEY)
+
+	writer, err := createCsvWriter("./data/hashes.csv")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer writer.Flush()
+
+	numWorkers := 4
+	numPages := 10
+	jobs := make(chan int, numPages)
+	results := make(chan [][]string, numPages)
+
+	// Start workers
+	for w := 0; w < numWorkers; w++ {
+		go func() {
+			for page := range jobs {
+				hashes := hashCards(page, tcg_client)
+				results <- hashes
+			}
+		}()
+	}
+
+	// Send jobs
+	for page := 1; page <= numPages; page++ {
+		jobs <- page
+	}
+	close(jobs)
+
+	// Collect results
+	var hashes [][]string
+	for i := 0; i < numPages; i++ {
+		pageHashes := <-results
+		hashes = append(hashes, pageHashes...)
+	}
+
+	for _, hash := range hashes {
+		writeRecord(writer, hash)
+	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("Processing took %s\n", elapsed)
 }
