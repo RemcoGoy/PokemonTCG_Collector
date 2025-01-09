@@ -14,7 +14,10 @@ run:
 	@go run cmd/api/main.go
 
 hashes:
-	@go run cmd/utils/hashes.go
+	@go run cmd/utils/hashes.go -cleanup=false
+
+hashes-cleanup:
+	@go run cmd/utils/hashes.go -cleanup=true
 
 # Test the application
 test:

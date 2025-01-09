@@ -3,8 +3,11 @@ package main
 import (
 	"backend/internal/utils"
 	"encoding/csv"
+	"encoding/json"
+	"flag"
 	"fmt"
 	"image"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -16,11 +19,23 @@ import (
 )
 
 func createCsvWriter(filename string) (*csv.Writer, error) {
-	file, err := os.Create(filename)
-	if err != nil {
-		return nil, err
+	// Check if file exists first
+	if _, err := os.Stat(filename); err == nil {
+		// File exists, open it in append mode
+		file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return nil, err
+		}
+		return csv.NewWriter(file), nil
+	} else {
+		// File doesn't exist, create it
+		file, err := os.Create(filename)
+		if err != nil {
+			return nil, err
+		}
+
+		return csv.NewWriter(file), nil
 	}
-	return csv.NewWriter(file), nil
 }
 
 func writeRecord(writer *csv.Writer, record []string) {
@@ -64,20 +79,58 @@ func hashCards(page int, client tcg.Client) [][]string {
 
 	return hashes
 }
-func main() {
-	start := time.Now()
-	log.Println("Starting hash generation process...")
 
+func getTotalCards() int {
+	url := "https://api.pokemontcg.io/v2/cards?pageSize=1&page=1"
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal("Error fetching cards:", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading response body:", err)
+	}
+	var response struct {
+		TotalCount int `json:"totalCount"`
+	}
+	if err := json.Unmarshal(body, &response); err != nil {
+		log.Fatal("Error parsing response:", err)
+	}
+	return response.TotalCount
+}
+
+func cleanup() {
 	if err := os.Remove("./data/hashes.csv"); err != nil && !os.IsNotExist(err) {
 		log.Fatal("Error removing existing hashes.csv file:", err)
 	}
-	log.Println("Cleaned up any existing hashes.csv file")
+}
 
+func createClient() tcg.Client {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file:", err)
 	}
 	API_KEY := os.Getenv("TCG_API_KEY")
-	tcg_client := tcg.NewClient(API_KEY)
+	return tcg.NewClient(API_KEY)
+}
+
+func main() {
+	cleanupFlag := flag.Bool("cleanup", true, "Whether to cleanup existing hashes.csv file")
+	flag.Parse()
+
+	start := time.Now()
+	log.Println("Starting hash generation process...")
+
+	totalCards := getTotalCards()
+	log.Printf("Total cards to process: %d", totalCards)
+
+	if *cleanupFlag {
+		cleanup()
+		log.Println("Cleaned up any existing hashes.csv file")
+	}
+
+	tcg_client := createClient()
 	log.Println("Successfully loaded API key and created TCG client")
 
 	writer, err := createCsvWriter("./data/hashes.csv")
@@ -87,7 +140,7 @@ func main() {
 	defer writer.Flush()
 	log.Println("Successfully created CSV writer")
 
-	numWorkers := 4
+	numWorkers := 10
 	numPages := 10
 	jobs := make(chan int, numPages)
 	results := make(chan [][]string, numPages)
