@@ -140,6 +140,8 @@ func main() {
 	defer writer.Flush()
 	log.Println("Successfully created CSV writer")
 
+	writeRecord(writer, []string{"id", "hash"})
+
 	numWorkers := 10
 	batchSize := 10
 	totalPages := (totalCards + 9) / 10
