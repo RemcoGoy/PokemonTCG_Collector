@@ -141,11 +141,11 @@ func main() {
 	log.Println("Successfully created CSV writer")
 
 	numWorkers := 10
-	numPages := 10
-	jobs := make(chan int, numPages)
-	results := make(chan [][]string, numPages)
+	batchSize := 10
+	totalPages := (totalCards + 9) / 10
 
-	log.Printf("Starting %d workers to process %d pages...", numWorkers, numPages)
+	jobs := make(chan int, batchSize)
+	results := make(chan [][]string, batchSize)
 
 	// Start workers
 	for w := 0; w < numWorkers; w++ {
@@ -160,27 +160,41 @@ func main() {
 		}(w)
 	}
 
-	// Send jobs
-	log.Println("Sending jobs to workers...")
-	for page := 1; page <= numPages; page++ {
-		jobs <- page
+	log.Printf("Processing %d total pages in batches of %d...", totalPages, batchSize)
+
+	// Process in batches
+	for batchStart := 1; batchStart <= totalPages; batchStart += batchSize {
+		batchEnd := batchStart + batchSize - 1
+		if batchEnd > totalPages {
+			batchEnd = totalPages
+		}
+
+		currentBatchSize := batchEnd - batchStart + 1
+		log.Printf("Processing batch from page %d to %d...", batchStart, batchEnd)
+
+		// Send jobs for this batch
+		for page := batchStart; page <= batchEnd; page++ {
+			jobs <- page
+		}
+
+		// Collect results for this batch
+		var batchHashes [][]string
+		for i := 0; i < currentBatchSize; i++ {
+			pageHashes := <-results
+			batchHashes = append(batchHashes, pageHashes...)
+			log.Printf("Collected results for page %d", batchStart+i)
+		}
+
+		// Write batch results to CSV
+		log.Printf("Writing %d hash records to CSV...", len(batchHashes))
+		for _, hash := range batchHashes {
+			writeRecord(writer, hash)
+		}
+
+		log.Printf("Completed batch %d to %d", batchStart, batchEnd)
 	}
+
 	close(jobs)
-	log.Println("All jobs sent to workers")
-
-	// Collect results
-	log.Println("Collecting results...")
-	var hashes [][]string
-	for i := 0; i < numPages; i++ {
-		pageHashes := <-results
-		hashes = append(hashes, pageHashes...)
-		log.Printf("Collected results for page %d", i+1)
-	}
-
-	log.Printf("Writing %d hash records to CSV...", len(hashes))
-	for _, hash := range hashes {
-		writeRecord(writer, hash)
-	}
 
 	elapsed := time.Since(start)
 	log.Printf("Processing completed. Total time: %s", elapsed)
