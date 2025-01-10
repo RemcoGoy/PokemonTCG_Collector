@@ -3,7 +3,7 @@ package utils
 import (
 	"backend/internal/types"
 	"encoding/binary"
-	"encoding/csv"
+	"encoding/gob"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -22,38 +22,28 @@ const (
 	extStrFmt        = "%1s:%s"
 )
 
-func readCardHashes() ([]types.CardHash, error) {
-	// Read card hashes from CSV file
-	file, err := os.Open("data/card_hashes.csv")
+func ReadCardHashesGob() []types.CardHashGob {
+	file, err := os.Open("data/card_hashes.gob")
 	if err != nil {
-		return nil, fmt.Errorf("failed to open card hashes file: %v", err)
+		panic(err)
 	}
 	defer file.Close()
 
-	reader := csv.NewReader(file)
-	_, err = reader.Read() // Skip header row
+	var cardHashes [][]string
+	err = gob.NewDecoder(file).Decode(&cardHashes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read header row: %v", err)
+		panic(err)
 	}
 
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("failed to read records: %v", err)
-	}
-
-	cardHashes := make([]types.CardHash, 0)
-	for _, record := range records {
-		cardHashes = append(cardHashes, types.CardHash{
-			ID:         record[0],
-			Perceptual: record[1],
-			Difference: record[2],
-			Wavelet:    record[3],
-			Color:      record[4],
-			TCGID:      record[5],
+	cardHashesGob := make([]types.CardHashGob, 0)
+	for _, cardHash := range cardHashes {
+		cardHashesGob = append(cardHashesGob, types.CardHashGob{
+			ID:   cardHash[0],
+			Hash: cardHash[1],
 		})
 	}
 
-	return cardHashes, nil
+	return cardHashesGob
 }
 
 func stringToExtHash(s string) (*goimagehash.ExtImageHash, error) {
@@ -93,20 +83,14 @@ func stringToExtHash(s string) (*goimagehash.ExtImageHash, error) {
 	return goimagehash.NewExtImageHash(hash, kind, len(hash)*64), nil
 }
 
-func FindClosestCard(hash *goimagehash.ExtImageHash) (types.CardHash, error) {
-	cardHashes, err := readCardHashes()
-	if err != nil {
-		return types.CardHash{}, fmt.Errorf("failed to read card hashes: %v", err)
-	}
-
+func FindClosestCard(hash *goimagehash.ExtImageHash, cardHashes []types.CardHashGob) (string, error) {
 	// Find closest match by calculating hamming distance
 	minDistance := -1
 	closestIdx := 0
 
 	for i, cardHash := range cardHashes {
 		// Convert stored hash string to ExtImageHash
-		pHash := "p:" + cardHash.Perceptual
-		storedHash, err := stringToExtHash(pHash)
+		storedHash, err := stringToExtHash(cardHash.Hash)
 		if err != nil {
 			fmt.Println("Error loading stored hash:", err)
 			continue
@@ -125,15 +109,19 @@ func FindClosestCard(hash *goimagehash.ExtImageHash) (types.CardHash, error) {
 		}
 	}
 
-	return cardHashes[closestIdx], nil
+	return cardHashes[closestIdx].ID, nil
 }
 
-func PhashImage(file multipart.File, header *multipart.FileHeader) (*goimagehash.ExtImageHash, error) {
+func PhashFile(file multipart.File, header *multipart.FileHeader) (*goimagehash.ExtImageHash, error) {
 	img, err := fileToImage(file, header)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert file to image: %v", err)
 	}
 
+	return PhashImage(img)
+}
+
+func PhashImage(img image.Image) (*goimagehash.ExtImageHash, error) {
 	// Calculate perceptual hash
 	hash, err := goimagehash.ExtPerceptionHash(img, PHASH_SIZE, PHASH_BLOCK_SIZE)
 	if err != nil {

@@ -3,9 +3,10 @@ module backend
 go 1.23.4
 
 require (
+	github.com/PokemonTCG/pokemon-tcg-sdk-go-v2 v0.1.1
+	github.com/corona10/goimagehash v1.1.0
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
-	github.com/go-chi/render v1.0.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
@@ -17,9 +18,6 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/PokemonTCG/pokemon-tcg-sdk-go-v2 v0.1.1 // indirect
-	github.com/ajg/form v1.5.1 // indirect
-	github.com/corona10/goimagehash v1.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect

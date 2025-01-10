@@ -32,19 +32,19 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	hash, err := utils.PhashImage(file, header)
+	hash, err := utils.PhashFile(file, header)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	cardHash, err := utils.FindClosestCard(hash)
+	cardId, err := utils.FindClosestCard(hash, s.CARD_HASHES)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	card, err := utils.GetCardData(cardHash.TCGID, s.TcgClient)
+	card, err := utils.GetCardData(cardId, s.TcgClient)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
