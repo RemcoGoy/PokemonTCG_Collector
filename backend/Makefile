@@ -14,10 +14,7 @@ run:
 	@go run cmd/api/main.go
 
 hashes:
-	@go run cmd/utils/hashes.go -cleanup=false
-
-hashes-cleanup:
-	@go run cmd/utils/hashes.go -cleanup=true
+	@go run cmd/utils/hashes.go -cleanup=$(if $(CLEANUP),$(CLEANUP),true) -format=$(if $(FORMAT),$(FORMAT),csv)
 
 # Test the application
 test:

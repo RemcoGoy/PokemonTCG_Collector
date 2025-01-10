@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/utils"
 	"encoding/csv"
+	"encoding/gob"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -16,6 +17,17 @@ import (
 	tcg "github.com/PokemonTCG/pokemon-tcg-sdk-go-v2/pkg"
 	"github.com/PokemonTCG/pokemon-tcg-sdk-go-v2/pkg/request"
 	"github.com/joho/godotenv"
+)
+
+const (
+	PAGE_SIZE  = 10 // Number of cards per page
+	WORKERS    = 20 // Number of workers
+	BATCH_SIZE = 20 // Number of pages per batch before writing to CSV
+)
+
+var (
+	TOTAL_CARDS = -1 // Total number of cards to process
+	TOTAL_PAGES = -1 // Total number of pages to process
 )
 
 func createCsvWriter(filename string) (*csv.Writer, error) {
@@ -115,15 +127,37 @@ func createClient() tcg.Client {
 	return tcg.NewClient(API_KEY)
 }
 
+func verifyGob() {
+	gobFile, err := os.Open("./data/hashes.gob")
+	if err != nil {
+		log.Fatal("Error opening gob file:", err)
+	}
+	defer gobFile.Close()
+
+	decoder := gob.NewDecoder(gobFile)
+	var hashes [][]string
+	if err := decoder.Decode(&hashes); err != nil {
+		log.Fatal("Error decoding gob file:", err)
+	}
+
+	fmt.Println("\nFirst 5 entries:")
+	for i := 0; i < 5 && i < len(hashes); i++ {
+		fmt.Printf("%v\n", hashes[i])
+	}
+
+	fmt.Printf("\nTotal number of entries: %d\n", len(hashes))
+}
+
 func main() {
 	cleanupFlag := flag.Bool("cleanup", true, "Whether to cleanup existing hashes.csv file")
+	formatFlag := flag.String("format", "csv", "Output format (csv or gob)")
 	flag.Parse()
 
 	start := time.Now()
 	log.Println("Starting hash generation process...")
 
-	totalCards := getTotalCards()
-	log.Printf("Total cards to process: %d", totalCards)
+	TOTAL_CARDS = getTotalCards()
+	log.Printf("Total cards to process: %d", TOTAL_CARDS)
 
 	if *cleanupFlag {
 		cleanup()
@@ -133,24 +167,36 @@ func main() {
 	tcg_client := createClient()
 	log.Println("Successfully loaded API key and created TCG client")
 
-	writer, err := createCsvWriter("./data/hashes.csv")
-	if err != nil {
-		log.Fatal("Error creating CSV writer:", err)
+	var writer *csv.Writer
+	var gobFile *os.File
+	var err error
+
+	if *formatFlag == "csv" {
+		writer, err = createCsvWriter("./data/hashes.csv")
+		if err != nil {
+			log.Fatal("Error creating CSV writer:", err)
+		}
+		defer writer.Flush()
+		log.Println("Successfully created CSV writer")
+		writeRecord(writer, []string{"id", "hash"})
+	} else if *formatFlag == "gob" {
+		gobFile, err = os.Create("./data/hashes.gob")
+		if err != nil {
+			log.Fatal("Error creating gob file:", err)
+		}
+		defer gobFile.Close()
+		log.Println("Successfully created gob file")
+	} else {
+		log.Fatal("Invalid format specified. Must be 'csv' or 'gob'")
 	}
-	defer writer.Flush()
-	log.Println("Successfully created CSV writer")
 
-	writeRecord(writer, []string{"id", "hash"})
+	TOTAL_PAGES = (TOTAL_CARDS + 9) / PAGE_SIZE
 
-	numWorkers := 10
-	batchSize := 10
-	totalPages := (totalCards + 9) / 10
-
-	jobs := make(chan int, batchSize)
-	results := make(chan [][]string, batchSize)
+	jobs := make(chan int, BATCH_SIZE)
+	results := make(chan [][]string, BATCH_SIZE)
 
 	// Start workers
-	for w := 0; w < numWorkers; w++ {
+	for w := 0; w < WORKERS; w++ {
 		go func(workerId int) {
 			log.Printf("Worker %d started", workerId)
 			for page := range jobs {
@@ -162,13 +208,15 @@ func main() {
 		}(w)
 	}
 
-	log.Printf("Processing %d total pages in batches of %d...", totalPages, batchSize)
+	log.Printf("Processing %d total pages in batches of %d...", TOTAL_PAGES, BATCH_SIZE)
+
+	var allHashes [][]string
 
 	// Process in batches
-	for batchStart := 1; batchStart <= totalPages; batchStart += batchSize {
-		batchEnd := batchStart + batchSize - 1
-		if batchEnd > totalPages {
-			batchEnd = totalPages
+	for batchStart := 1; batchStart <= TOTAL_PAGES; batchStart += BATCH_SIZE {
+		batchEnd := batchStart + BATCH_SIZE - 1
+		if batchEnd > TOTAL_PAGES {
+			batchEnd = TOTAL_PAGES
 		}
 
 		currentBatchSize := batchEnd - batchStart + 1
@@ -184,19 +232,32 @@ func main() {
 		for i := 0; i < currentBatchSize; i++ {
 			pageHashes := <-results
 			batchHashes = append(batchHashes, pageHashes...)
-			log.Printf("Collected results for page %d", batchStart+i)
 		}
 
-		// Write batch results to CSV
-		log.Printf("Writing %d hash records to CSV...", len(batchHashes))
-		for _, hash := range batchHashes {
-			writeRecord(writer, hash)
+		if *formatFlag == "csv" {
+			// Write batch results to CSV
+			for _, hash := range batchHashes {
+				writeRecord(writer, hash)
+			}
+		} else {
+			// Collect all hashes for gob encoding
+			allHashes = append(allHashes, batchHashes...)
 		}
 
 		log.Printf("Completed batch %d to %d", batchStart, batchEnd)
 	}
 
 	close(jobs)
+
+	if *formatFlag == "gob" {
+		encoder := gob.NewEncoder(gobFile)
+		if err := encoder.Encode(allHashes); err != nil {
+			log.Fatal("Error encoding to gob:", err)
+		}
+		log.Println("Successfully wrote all hashes to gob file")
+
+		verifyGob()
+	}
 
 	elapsed := time.Since(start)
 	log.Printf("Processing completed. Total time: %s", elapsed)
