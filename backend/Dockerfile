@@ -14,7 +14,12 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the source code into the container
-COPY . .
+COPY ./cmd ./cmd
+COPY ./docs ./docs
+COPY ./internal ./internal
+COPY .air.toml Makefile ./
+
+RUN mkdir ./data
 
 # Build the application
 RUN make build
