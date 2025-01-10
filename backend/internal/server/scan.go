@@ -38,7 +38,7 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cardId, err := utils.FindClosestCard(hash)
+	cardId, err := utils.FindClosestCard(hash, s.CARD_HASHES)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return

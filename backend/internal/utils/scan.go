@@ -22,17 +22,17 @@ const (
 	extStrFmt        = "%1s:%s"
 )
 
-func readCardHashesGob() ([]types.CardHashGob, error) {
+func ReadCardHashesGob() []types.CardHashGob {
 	file, err := os.Open("data/card_hashes.gob")
 	if err != nil {
-		return nil, fmt.Errorf("failed to open card hashes file: %v", err)
+		panic(err)
 	}
 	defer file.Close()
 
 	var cardHashes [][]string
 	err = gob.NewDecoder(file).Decode(&cardHashes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode card hashes: %v", err)
+		panic(err)
 	}
 
 	cardHashesGob := make([]types.CardHashGob, 0)
@@ -43,7 +43,7 @@ func readCardHashesGob() ([]types.CardHashGob, error) {
 		})
 	}
 
-	return cardHashesGob, nil
+	return cardHashesGob
 }
 
 func stringToExtHash(s string) (*goimagehash.ExtImageHash, error) {
@@ -83,13 +83,7 @@ func stringToExtHash(s string) (*goimagehash.ExtImageHash, error) {
 	return goimagehash.NewExtImageHash(hash, kind, len(hash)*64), nil
 }
 
-func FindClosestCard(hash *goimagehash.ExtImageHash) (string, error) {
-	// cardHashes, err := readCardHashes()
-	cardHashes, err := readCardHashesGob()
-	if err != nil {
-		return "", fmt.Errorf("failed to read card hashes: %v", err)
-	}
-
+func FindClosestCard(hash *goimagehash.ExtImageHash, cardHashes []types.CardHashGob) (string, error) {
 	// Find closest match by calculating hamming distance
 	minDistance := -1
 	closestIdx := 0
