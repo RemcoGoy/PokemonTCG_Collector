@@ -22,3 +22,8 @@ type CardHash struct {
 	Color      string `json:"color"`
 	TCGID      string `json:"tcg_id"`
 }
+
+type CardHashGob struct {
+	ID   string `json:"id"`
+	Hash string `json:"hash"`
+}

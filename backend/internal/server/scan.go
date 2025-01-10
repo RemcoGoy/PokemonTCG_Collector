@@ -25,7 +25,7 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, header, err := r.FormFile("card")
+	file, header, err := r.FormFile("card.jpg")
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -38,13 +38,13 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cardHash, err := utils.FindClosestCard(hash)
+	cardId, err := utils.FindClosestCard(hash)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	card, err := utils.GetCardData(cardHash.TCGID, s.TcgClient)
+	card, err := utils.GetCardData(cardId, s.TcgClient)
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
