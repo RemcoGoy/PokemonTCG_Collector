@@ -25,7 +25,7 @@ func (s *Server) Scan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, header, err := r.FormFile("card.jpg")
+	file, header, err := r.FormFile("card")
 	if err != nil {
 		utils.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
