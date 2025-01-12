@@ -1,7 +1,7 @@
 import 'package:application/components/Appbar.dart';
 import 'package:application/pages/Home.dart';
 import 'package:application/pages/Profile.dart';
-import 'package:application/pages/camera.dart';
+import 'package:application/pages/detection.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -64,7 +64,7 @@ class _HomeState extends State{
 
   static const List<Widget> _pages = <Widget>[
     Home(),
-    Camera(),
+    DetectionVideo(),
     Profile()
   ];
 

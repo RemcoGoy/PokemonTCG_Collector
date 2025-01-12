@@ -62,10 +62,10 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver{
             onPressed: () async {
               XFile picture = await cameraController!.takePicture();
               Gal.putImage(picture.path);
-            }, 
+            },
             icon: const Icon(
               size: 40,
-              Icons.circle_outlined, 
+              Icons.circle_outlined,
               color: Colors.deepPurple
             )
           )
@@ -75,14 +75,13 @@ class _CameraState extends State<Camera> with WidgetsBindingObserver{
 
   }
 
-
   Future<void> _setUpCameraController() async {
     List<CameraDescription> _cameras = await availableCameras();
 
     if(_cameras.isNotEmpty){
       setState(() {
         cameras = _cameras;
-        cameraController = CameraController(_cameras.last, ResolutionPreset.high);
+        cameraController = CameraController(_cameras.first, ResolutionPreset.high);
       });
 
       cameraController?.initialize().then((_) {
