@@ -1,16 +1,17 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
 
-class DetectionVideo extends StatefulWidget {
-  const DetectionVideo({Key? key}) : super(key: key);
+late List<CameraDescription> cameras;
+
+class YoloVideo extends StatefulWidget {
+  const YoloVideo({Key? key}) : super(key: key);
 
   @override
-  State<DetectionVideo> createState() => _DetectionVideoState();
+  State<YoloVideo> createState() => _YoloVideoState();
 }
 
-class _DetectionVideoState extends State<DetectionVideo> {
-  late List<CameraDescription> cameras;
+class _YoloVideoState extends State<YoloVideo>{
   late CameraController controller;
   late FlutterVision vision;
   late List<Map<String, dynamic>> yoloResults;
@@ -115,14 +116,13 @@ class _DetectionVideoState extends State<DetectionVideo> {
         modelPath: 'assets/models/yolov8n.tflite',
         modelVersion: "yolov8",
         numThreads: 1,
-        useGpu: true
-    );
-
+        useGpu: true);
     setState(() {
       isLoaded = true;
     });
   }
 
+  // Real-time object detection function by yoloOnFrame
   Future<void> yoloOnFrame(CameraImage cameraImage) async {
     final result = await vision.yoloOnFrame(
         bytesList: cameraImage.planes.map((plane) => plane.bytes).toList(),
@@ -130,8 +130,7 @@ class _DetectionVideoState extends State<DetectionVideo> {
         imageWidth: cameraImage.width,
         iouThreshold: 0.4,
         confThreshold: 0.4,
-        classThreshold: 0.5
-    );
+        classThreshold: 0.5);
     if (result.isNotEmpty) {
       setState(() {
         yoloResults = result;
@@ -153,7 +152,6 @@ class _DetectionVideoState extends State<DetectionVideo> {
       }
     });
   }
-
   Future<void> stopDetection() async {
     setState(() {
       isDetecting = false;

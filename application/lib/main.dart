@@ -5,6 +5,7 @@ import 'package:application/pages/detection.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 
@@ -64,7 +65,7 @@ class _HomeState extends State{
 
   static const List<Widget> _pages = <Widget>[
     Home(),
-    DetectionVideo(),
+    YoloVideo(),
     Profile()
   ];
 
