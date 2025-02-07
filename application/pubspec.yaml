@@ -14,7 +14,9 @@ dependencies:
   http: ^1.2.2
   camera: ^0.11.0+2
   gal: ^2.3.1
-  flutter_vision: ^1.1.4
+  image: ^4.5.2
+  onnxruntime: ^1.4.1
+  path_provider: ^2.1.5
 
 dependency_overrides:
   camera_android: 0.9.7+1
@@ -27,8 +29,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/models/labels.txt
-    - assets/models/yolov8n.tflite
+    - assets/models/best.onnx
 
   fonts:
     - family: red hat text

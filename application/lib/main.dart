@@ -65,7 +65,7 @@ class _HomeState extends State{
 
   static const List<Widget> _pages = <Widget>[
     Home(),
-    YoloVideo(),
+    DetectionPage(),
     Profile()
   ];
 

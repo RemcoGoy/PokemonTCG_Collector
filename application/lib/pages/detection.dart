@@ -1,197 +1,217 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_vision/flutter_vision.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
+import 'package:onnxruntime/onnxruntime.dart';
 
-late List<CameraDescription> cameras;
-
-class YoloVideo extends StatefulWidget {
-  const YoloVideo({Key? key}) : super(key: key);
+class DetectionPage extends StatefulWidget {
+  const DetectionPage({Key? key}) : super(key: key);
 
   @override
-  State<YoloVideo> createState() => _YoloVideoState();
+  _DetectionPageState createState() => _DetectionPageState();
 }
 
-class _YoloVideoState extends State<YoloVideo>{
-  late CameraController controller;
-  late FlutterVision vision;
-  late List<Map<String, dynamic>> yoloResults;
-
-  CameraImage? cameraImage;
-  bool isLoaded = false;
-  bool isDetecting = false;
-  double confidenceThreshold = 0.5;
+class _DetectionPageState extends State<DetectionPage> {
+  File? _image;
+  List<Map<String, dynamic>>? _detections;
+  late OrtSession _session;
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    init();
-  }
-
-  init() async {
-    cameras = await availableCameras();
-    vision = FlutterVision();
-    controller = CameraController(cameras[0], ResolutionPreset.high);
-    controller.initialize().then((value) {
-      loadYoloModel().then((value) {
-        setState(() {
-          isLoaded = true;
-          isDetecting = false;
-          yoloResults = [];
-        });
-      });
-    });
+    OrtEnv.instance.init();
+    _loadModel();
+    _initializeCamera();
   }
 
   @override
-  void dispose() async {
+  void dispose() {
+    _cameraController?.dispose();
+    OrtEnv.instance.release();
     super.dispose();
-    controller.dispose();
-    await vision.closeYoloModel();
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) return;
+
+    _cameraController = CameraController(
+      cameras.first,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
+
+    await _cameraController!.initialize();
+    setState(() {
+      _isCameraInitialized = true;
+    });
+  }
+
+  Future<void> _loadModel() async {
+    final sessionOptions = OrtSessionOptions();
+    const assetFileName = "assets/models/best.onnx";
+    final rawAssetFile = await rootBundle.load(assetFileName);
+    final bytes = rawAssetFile.buffer.asUint8List();
+
+    // Create ONNX Runtime session
+    _session = await OrtSession.fromBuffer(bytes, sessionOptions);
+  }
+
+  Future<void> _takePhoto() async {
+    if (!_isCameraInitialized || _cameraController == null) return;
+
+    final XFile photo = await _cameraController!.takePicture();
+    setState(() {
+      _image = File(photo.path);
+      _processImage();
+    });
+  }
+
+  Future<void> _processImage() async {
+    if (_image == null) return;
+
+    // Load and preprocess image
+    final imageBytes = await _image!.readAsBytes();
+    final decodedImage = img.decodeImage(imageBytes);
+    if (decodedImage == null) return;
+
+    // Resize to 640x640
+    final resizedImage = img.copyResize(decodedImage, width: 640, height: 640);
+
+    // Convert to float32 array and normalize
+    List<double> imgArray = [];
+    for (var y = 0; y < 640; y++) {
+      for (var x = 0; x < 640; x++) {
+        final pixel = resizedImage.getPixel(x, y);
+        // Store in CHW format (channel, height, width)
+        final offset = y * 640 + x;
+
+        imgArray.add(pixel.r / 255.0); // Use add()
+        imgArray.add(pixel.g / 255.0); // Use add()
+        imgArray.add(pixel.b / 255.0); // Use add()
+      }
+    }
+
+    // Run inference
+    final inputOrt = OrtValueTensor.createTensorWithDataList(imgArray, [1, 3, 640, 640]);
+    final inputs = {'images': inputOrt};
+    final runOptions = OrtRunOptions();
+    final outputs = await _session.runAsync(runOptions, inputs);
+    inputOrt.release();
+    runOptions.release();
+
+    outputs?.forEach((element) {
+      print("ELEMENT");
+      print(element);
+      element?.release();
+    });
+
+    // // Process predictions (assuming YOLO v8 output format)
+    // setState(() {
+    //   _detections = [];
+    //   for (var i = 0; i < predictions.length; i += 6) {
+    //     if (predictions[i + 4] > 0.25) { // Confidence threshold
+    //       _detections!.add({
+    //         'bbox': [
+    //           predictions[i],     // x1
+    //           predictions[i + 1], // y1
+    //           predictions[i + 2], // x2
+    //           predictions[i + 3], // y2
+    //         ],
+    //         'confidence': predictions[i + 4],
+    //       });
+    //     }
+    //   }
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
-
-    if (!isLoaded) {
-      return const Scaffold(
-        body: Center(
-          child: Text("Model not loaded, waiting for it"),
-        ),
-      );
-    }
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
+      appBar: AppBar(
+        title: const Text('Card Detection'),
+      ),
+      body: Column(
         children: [
-          AspectRatio(
-            aspectRatio: controller.value.aspectRatio,
-            child: CameraPreview(
-              controller,
-            ),
-          ),
-          ...displayBoxesAroundRecognizedObjects(size),
-          Positioned(
-            bottom: 75,
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-              height: 80,
-              width: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    width: 5, color: Colors.white, style: BorderStyle.solid),
-              ),
-              child: isDetecting
-                  ? IconButton(
-                onPressed: () async {
-                  stopDetection();
-                },
-                icon: const Icon(
-                  Icons.stop,
-                  color: Colors.red,
-                ),
-                iconSize: 50,
-              )
-                  : IconButton(
-                onPressed: () async {
-                  await startDetection();
-                },
-                icon: const Icon(
-                  Icons.play_arrow,
-                  color: Colors.white,
-                ),
-                iconSize: 50,
+          if (!_isCameraInitialized) ...[
+            const Expanded(
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
             ),
-          ),
+          ] else if (_image == null) ...[
+            Expanded(
+              child: CameraPreview(_cameraController!),
+            ),
+          ] else ...[
+            Expanded(
+              child: CustomPaint(
+                painter: BoundingBoxPainter(
+                  image: _image!,
+                  detections: _detections ?? [],
+                ),
+                child: Image.file(_image!),
+              ),
+            ),
+          ],
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _image == null ? _takePhoto : () {
+          setState(() {
+            _image = null;
+            _detections = null;
+          });
+        },
+        child: Icon(_image == null ? Icons.camera_alt : Icons.refresh),
       ),
     );
   }
+}
 
-  Future<void> loadYoloModel() async {
-    await vision.loadYoloModel(
-        labels: 'assets/models/labels.txt',
-        modelPath: 'assets/models/yolov8n.tflite',
-        modelVersion: "yolov8",
-        numThreads: 1,
-        useGpu: true);
-    setState(() {
-      isLoaded = true;
-    });
-  }
+class BoundingBoxPainter extends CustomPainter {
+  final File image;
+  final List<Map<String, dynamic>> detections;
 
-  // Real-time object detection function by yoloOnFrame
-  Future<void> yoloOnFrame(CameraImage cameraImage) async {
-    final result = await vision.yoloOnFrame(
-        bytesList: cameraImage.planes.map((plane) => plane.bytes).toList(),
-        imageHeight: cameraImage.height,
-        imageWidth: cameraImage.width,
-        iouThreshold: 0.4,
-        confThreshold: 0.4,
-        classThreshold: 0.5);
-    if (result.isNotEmpty) {
-      setState(() {
-        yoloResults = result;
-      });
-    }
-  }
+  BoundingBoxPainter({required this.image, required this.detections});
 
-  Future<void> startDetection() async {
-    setState(() {
-      isDetecting = true;
-    });
-    if (controller.value.isStreamingImages) {
-      return;
-    }
-    await controller.startImageStream((image) async {
-      if (isDetecting) {
-        cameraImage = image;
-        yoloOnFrame(image);
-      }
-    });
-  }
-  Future<void> stopDetection() async {
-    setState(() {
-      isDetecting = false;
-      yoloResults.clear();
-    });
-  }
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.green
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
 
-  List<Widget> displayBoxesAroundRecognizedObjects(Size screen) {
-    if (yoloResults.isEmpty) return [];
-    double factorX = screen.width / (cameraImage?.height ?? 1);
-    double factorY = screen.height / (cameraImage?.width ?? 1);
+    for (final detection in detections) {
+      final bbox = detection['bbox'] as List<double>;
+      final rect = Rect.fromLTRB(
+        bbox[0] * size.width,
+        bbox[1] * size.height,
+        bbox[2] * size.width,
+        bbox[3] * size.height,
+      );
+      canvas.drawRect(rect, paint);
 
-    Color colorPick = const Color.fromARGB(255, 50, 233, 30);
-
-    return yoloResults.map((result) {
-      double objectX = result["box"][0] * factorX;
-      double objectY = result["box"][1] * factorY;
-      double objectWidth = (result["box"][2] - result["box"][0]) * factorX;
-      double objectHeight = (result["box"][3] - result["box"][1]) * factorY;
-
-      return Positioned(
-        left: objectX,
-        top: objectY,
-        width: objectWidth,
-        height: objectHeight,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-            border: Border.all(color: Colors.pink, width: 2.0),
-          ),
-          child: Text(
-            "${result['tag']} ${(result['box'][4] * 100)}",
-            style: TextStyle(
-              background: Paint()..color = colorPick,
-              color: const Color.fromARGB(255, 115, 0, 255),
-              fontSize: 18.0,
-            ),
+      // Draw confidence text
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: 'Card: ${(detection['confidence'] * 100).toStringAsFixed(1)}%',
+          style: const TextStyle(
+            color: Colors.green,
+            fontSize: 16,
+            backgroundColor: Colors.black54,
           ),
         ),
+        textDirection: TextDirection.ltr,
       );
-    }).toList();
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(rect.left, rect.top - 20));
+    }
   }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
