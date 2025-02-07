@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
@@ -83,49 +84,55 @@ class _DetectionPageState extends State<DetectionPage> {
 
     // Convert to float32 array and normalize
     List<double> imgArray = [];
-    for (var y = 0; y < 640; y++) {
-      for (var x = 0; x < 640; x++) {
-        final pixel = resizedImage.getPixel(x, y);
-        // Store in CHW format (channel, height, width)
-        final offset = y * 640 + x;
-
-        imgArray.add(pixel.r / 255.0); // Use add()
-        imgArray.add(pixel.g / 255.0); // Use add()
-        imgArray.add(pixel.b / 255.0); // Use add()
+    // Process channels in RGB order (transpose to channel-first format)
+    for (var c = 0; c < 3; c++) {
+      for (var y = 0; y < 640; y++) {
+        for (var x = 0; x < 640; x++) {
+          final pixel = resizedImage.getPixel(x, y);
+          double value;
+          switch (c) {
+            case 0: value = pixel.r.toDouble(); break;
+            case 1: value = pixel.g.toDouble(); break;
+            case 2: value = pixel.b.toDouble(); break;
+            default: value = 0;
+          }
+          imgArray.add(value / 255.0);
+        }
       }
     }
+    final inputData = Float32List.fromList(imgArray);
 
     // Run inference
-    final inputOrt = OrtValueTensor.createTensorWithDataList(imgArray, [1, 3, 640, 640]);
+    final inputOrt = OrtValueTensor.createTensorWithDataList(inputData, [1, 3, 640, 640]);
     final inputs = {'images': inputOrt};
     final runOptions = OrtRunOptions();
     final outputs = await _session.runAsync(runOptions, inputs);
-    inputOrt.release();
-    runOptions.release();
+    List<List<List<double>>> predictions = outputs?.first?.value as List<List<List<double>>>;
 
-    outputs?.forEach((element) {
-      print("ELEMENT");
-      print(element);
-      element?.release();
+    setState(() {
+      _detections = [];
+      predictions.forEach((elem) {
+        elem.forEach((bbox) {
+          if (bbox[4] > 0.25) {
+            _detections!.add({
+              'bbox': [
+                bbox[0], // x1
+                bbox[1], // y1
+                bbox[2], // x2
+                bbox[3], // y2
+              ],
+              'confidence': bbox[4],
+            });
+          }
+        });
+      });
     });
 
-    // // Process predictions (assuming YOLO v8 output format)
-    // setState(() {
-    //   _detections = [];
-    //   for (var i = 0; i < predictions.length; i += 6) {
-    //     if (predictions[i + 4] > 0.25) { // Confidence threshold
-    //       _detections!.add({
-    //         'bbox': [
-    //           predictions[i],     // x1
-    //           predictions[i + 1], // y1
-    //           predictions[i + 2], // x2
-    //           predictions[i + 3], // y2
-    //         ],
-    //         'confidence': predictions[i + 4],
-    //       });
-    //     }
-    //   }
-    // });
+    inputOrt.release();
+    runOptions.release();
+    outputs?.forEach((element) {
+      element?.release();
+    });
   }
 
   @override
@@ -149,11 +156,10 @@ class _DetectionPageState extends State<DetectionPage> {
           ] else ...[
             Expanded(
               child: CustomPaint(
-                painter: BoundingBoxPainter(
-                  image: _image!,
+                child: Image.file(_image!),
+                foregroundPainter: BoundingBoxPainter(
                   detections: _detections ?? [],
                 ),
-                child: Image.file(_image!),
               ),
             ),
           ],
@@ -173,10 +179,9 @@ class _DetectionPageState extends State<DetectionPage> {
 }
 
 class BoundingBoxPainter extends CustomPainter {
-  final File image;
   final List<Map<String, dynamic>> detections;
 
-  BoundingBoxPainter({required this.image, required this.detections});
+  BoundingBoxPainter({required this.detections});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -188,10 +193,10 @@ class BoundingBoxPainter extends CustomPainter {
     for (final detection in detections) {
       final bbox = detection['bbox'] as List<double>;
       final rect = Rect.fromLTRB(
-        bbox[0] * size.width,
-        bbox[1] * size.height,
-        bbox[2] * size.width,
-        bbox[3] * size.height,
+        bbox[0],
+        bbox[1],
+        bbox[2],
+        bbox[3],
       );
       canvas.drawRect(rect, paint);
 
