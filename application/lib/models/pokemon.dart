@@ -12,6 +12,6 @@ class Pokemon {
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
-    return Pokemon(name: json['name'], id: json['id'], imageUrl: json['images']['small'], setId: json['set']['id']);
+    return Pokemon(name: json['name'], id: json['id'], imageUrl: json['imageUrl'], setId: json['setId']);
   }
 }
