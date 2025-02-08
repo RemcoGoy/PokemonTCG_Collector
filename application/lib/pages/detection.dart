@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
+
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:onnxruntime/onnxruntime.dart';
@@ -91,10 +92,17 @@ class _DetectionPageState extends State<DetectionPage> {
           final pixel = resizedImage.getPixel(x, y);
           double value;
           switch (c) {
-            case 0: value = pixel.r.toDouble(); break;
-            case 1: value = pixel.g.toDouble(); break;
-            case 2: value = pixel.b.toDouble(); break;
-            default: value = 0;
+            case 0:
+              value = pixel.r.toDouble();
+              break;
+            case 1:
+              value = pixel.g.toDouble();
+              break;
+            case 2:
+              value = pixel.b.toDouble();
+              break;
+            default:
+              value = 0;
           }
           imgArray.add(value / 255.0);
         }
@@ -103,11 +111,13 @@ class _DetectionPageState extends State<DetectionPage> {
     final inputData = Float32List.fromList(imgArray);
 
     // Run inference
-    final inputOrt = OrtValueTensor.createTensorWithDataList(inputData, [1, 3, 640, 640]);
+    final inputOrt =
+        OrtValueTensor.createTensorWithDataList(inputData, [1, 3, 640, 640]);
     final inputs = {'images': inputOrt};
     final runOptions = OrtRunOptions();
     final outputs = await _session.runAsync(runOptions, inputs);
-    List<List<List<double>>> predictions = outputs?.first?.value as List<List<List<double>>>;
+    List<List<List<double>>> predictions =
+        outputs?.first?.value as List<List<List<double>>>;
 
     setState(() {
       _detections = [];
@@ -138,9 +148,6 @@ class _DetectionPageState extends State<DetectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Card Detection'),
-      ),
       body: Column(
         children: [
           if (!_isCameraInitialized) ...[
@@ -166,12 +173,14 @@ class _DetectionPageState extends State<DetectionPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _image == null ? _takePhoto : () {
-          setState(() {
-            _image = null;
-            _detections = null;
-          });
-        },
+        onPressed: _image == null
+            ? _takePhoto
+            : () {
+                setState(() {
+                  _image = null;
+                  _detections = null;
+                });
+              },
         child: Icon(_image == null ? Icons.camera_alt : Icons.refresh),
       ),
     );
@@ -190,13 +199,21 @@ class BoundingBoxPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
+    // Calculate scale factors to map model coordinates to screen coordinates
+    final imageWidth = 640;
+    final imageHeight = 640;
+    final scaleX = size.width / imageWidth;
+    final scaleY = size.height / imageHeight;
+
     for (final detection in detections) {
       final bbox = detection['bbox'] as List<double>;
+
+      // Scale the bounding box coordinates
       final rect = Rect.fromLTRB(
-        bbox[0],
-        bbox[1],
-        bbox[2],
-        bbox[3],
+        bbox[0] * scaleX,
+        bbox[1] * scaleY,
+        bbox[2] * scaleX,
+        bbox[3] * scaleY,
       );
       canvas.drawRect(rect, paint);
 
