@@ -17,7 +17,7 @@ RUN go mod download
 COPY ./cmd ./cmd
 COPY ./docs ./docs
 COPY ./internal ./internal
-COPY .air.toml Makefile ./
+COPY .air.toml Makefile .env ./
 
 RUN mkdir ./data
 
