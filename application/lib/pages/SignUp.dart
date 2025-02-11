@@ -1,8 +1,6 @@
 import 'package:application/components/Button.dart';
 import 'package:application/components/Textfield.dart';
 import 'package:application/main.dart';
-import 'package:application/pages/Home.dart';
-import 'package:application/pages/login.dart';
 import 'package:application/services/AuthService.dart';
 import 'package:flutter/material.dart';
 

@@ -5,6 +5,7 @@ import 'package:application/pages/camera.dart';
 import 'package:application/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   
@@ -12,8 +13,10 @@ void main() async {
   
   // Initialize Hive
   await Hive.initFlutter();
+  await Hive.openBox('userStorage');
 
-  var box = await Hive.openBox('userStorage');
+  // Initialize .env
+  await dotenv.load(fileName: '.env');
 
   runApp(const MainApp());
 }
