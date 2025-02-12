@@ -23,7 +23,7 @@ import (
 //	@Param			loginRequest	body		types.LoginRequest	true	"Login request"
 //	@Success		200				{object}	types.LoginResponse
 //	@Failure		400				{object}	types.ErrorResponse
-//	@Router			/login [post]
+//	@Router			/auth/login [post]
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 	var loginRequest t.LoginRequest
@@ -60,7 +60,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 //	@Success		200	{object}	types.LogoutResponse
 //	@Failure		400	{object}	types.ErrorResponse
 //	@Failure		401	{object}	types.ErrorResponse
-//	@Router			/logout [post]
+//	@Router			/auth/logout [post]
 func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 	if r.Header.Get("Authorization") == "" {
@@ -98,7 +98,7 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 //	@Param			registerRequest	body		types.RegisterRequest	true	"Register request"
 //	@Success		200				{object}	types.RegisterResponse
 //	@Failure		400				{object}	types.ErrorResponse
-//	@Router			/signup [post]
+//	@Router			/auth/signup [post]
 func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	resp := make(map[string]any)
 
