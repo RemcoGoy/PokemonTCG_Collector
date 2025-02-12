@@ -20,6 +20,7 @@ class _DetectionRealtimePageState extends State<DetectionRealtimePage> {
   late OrtSession _session;
   List<Map<String, dynamic>>? _detections;
   bool _isProcessing = false;
+  Size? _previewSize;
 
   @override
   void initState() {
@@ -27,6 +28,34 @@ class _DetectionRealtimePageState extends State<DetectionRealtimePage> {
     OrtEnv.instance.init();
     _loadModel();
     _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) return;
+
+    _cameraController = CameraController(
+      cameras.first,
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
+
+    await _cameraController!.initialize();
+    _previewSize = Size(
+      _cameraController!.value.previewSize!.width,
+      _cameraController!.value.previewSize!.height,
+    );
+
+    _cameraController!.startImageStream((image) {
+      if (!mounted) return;
+      _processImage(image);
+    });
+
+    if (mounted) {
+      setState(() {
+        _isCameraInitialized = true;
+      });
+    }
   }
 
   @override
@@ -111,37 +140,23 @@ class _DetectionRealtimePageState extends State<DetectionRealtimePage> {
     }
   }
 
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) return;
-
-    _cameraController = CameraController(
-      cameras.first,
-      ResolutionPreset.medium,
-      enableAudio: false,
-    );
-
-    await _cameraController!.initialize();
-
-    _cameraController!.startImageStream((image) {
-      if (!mounted) return;
-      _processImage(image);
-    });
-
-    if (mounted) {
-      setState(() {
-        _isCameraInitialized = true;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           _isCameraInitialized
-              ? CameraPreview(_cameraController!)
+              ? Stack(
+                  children: [
+                    CustomPaint(
+                      child: CameraPreview(_cameraController!),
+                      foregroundPainter: BoundingBoxPainter(
+                        detections: _detections ?? [],
+                      ),
+                      size: _previewSize!,
+                    ),
+                  ],
+                )
               : const Center(
                   child: CircularProgressIndicator(),
                 ),
@@ -168,4 +183,58 @@ class _DetectionRealtimePageState extends State<DetectionRealtimePage> {
       ),
     );
   }
+}
+
+class BoundingBoxPainter extends CustomPainter {
+  final List<Map<String, dynamic>> detections;
+
+  BoundingBoxPainter({required this.detections});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.green
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    // Calculate scale factors to map model coordinates to screen coordinates
+    final imageWidth = 640.0;
+    final imageHeight = 640.0;
+
+    // Scale to fit the preview size while maintaining aspect ratio
+    final scaleX = size.width / imageWidth;
+    final scaleY = size.height / imageHeight;
+
+    for (final detection in detections) {
+      final bbox = detection['bbox'] as List<double>;
+
+      // Scale the bounding box coordinates
+      final rect = Rect.fromLTRB(
+        bbox[0] * scaleX,
+        bbox[1] * scaleY,
+        bbox[2] * scaleX,
+        bbox[3] * scaleY,
+      );
+      canvas.drawRect(rect, paint);
+
+      // Draw confidence text
+      final textSpan = TextSpan(
+        text: 'Card: ${(detection['confidence'] * 100).toStringAsFixed(1)}%',
+        style: const TextStyle(
+          color: Colors.green,
+          fontSize: 16,
+          backgroundColor: Colors.black54,
+        ),
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(rect.left, rect.top - 20));
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
