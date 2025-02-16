@@ -11,13 +11,12 @@ void signUserIn(String email, String password, BuildContext context) async {
   }else{
     final userStorage = Hive.box('userStorage');
 
-    final response = await post('auth/login', {
+    final response = await post('auth/login', body: {
       "email": email,
       "password": password
     });
 
     if(response.statusCode == 200){
-      print(json.decode(response.body));
       userStorage.put('email', email);
       userStorage.put('AuthToken', json.decode(response.body)['token'].toString());
       Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
@@ -37,11 +36,9 @@ void signUserUp(String email, String password, String username, BuildContext con
       "username": username
     };
 
-    print(body);
-    final response = await post('auth/signup', body);
+    final response = await post('auth/signup', body: body);
 
     if(response.statusCode == 200){
-      print(response.body);
       Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
     }else{
       print("Something whent wrong: " + response.body);
@@ -52,10 +49,7 @@ void signUserUp(String email, String password, String username, BuildContext con
 
 void logout(BuildContext context) async {
   final userStorage = Hive.box('userStorage');
-  final authToken = setAuthToken(userStorage.get("AuthToken").toString());
-  final response = await post('auth/logout', {}, authToken);
-
-  userStorage.clear();
+  final response = await authPost('auth/logout');
   
   if(response.statusCode == 200){
     userStorage.clear();
