@@ -15,7 +15,7 @@ class Profile extends StatelessWidget {
             size: 150,
           ),
           TCGButton(
-            buttonText: 'Sign in',
+            buttonText: 'Logout',
             onTap: () => logout(context),
           ),
         ]

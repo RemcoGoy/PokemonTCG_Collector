@@ -17,12 +17,13 @@ void signUserIn(String email, String password, BuildContext context) async {
     });
 
     if(response.statusCode == 200){
+      print(json.decode(response.body));
       userStorage.put('email', email);
-      userStorage.put('AuthToken', json.decode(response.body)['token']);
+      userStorage.put('AuthToken', json.decode(response.body)['token'].toString());
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
     }else{
       print("Something whent wrong: " + response.body);
     }
-    Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
   }
 }
 
@@ -41,17 +42,25 @@ void signUserUp(String email, String password, String username, BuildContext con
 
     if(response.statusCode == 200){
       print(response.body);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
     }else{
       print("Something whent wrong: " + response.body);
     }
     
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
   }
 }
 
-void logout(BuildContext context){
+void logout(BuildContext context) async {
   final userStorage = Hive.box('userStorage');
-  userStorage.clear();
+  final authToken = setAuthToken(userStorage.get("AuthToken").toString());
+  final response = await post('auth/logout', {}, authToken);
 
-  Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
+  userStorage.clear();
+  
+  if(response.statusCode == 200){
+    userStorage.clear();
+    Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
+  }else{
+    print("Something whent wrong: " + response.body);
+  }
 }

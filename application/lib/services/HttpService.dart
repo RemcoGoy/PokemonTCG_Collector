@@ -14,7 +14,7 @@ Future<Response> get(String uri) async {
   return await http.get(url);
 }
 
-Future<Response> post(String uri, Object? body) async {
+Future<Response> post(String uri, [Object? body, Map<String, String>? headers]) async {
   final serverUrl = dotenv.env['SERVER_URL'];
   if(serverUrl == null){
     throw Exception('serverUrl not found');
@@ -23,6 +23,13 @@ Future<Response> post(String uri, Object? body) async {
   print(url);
   return await http.post(
     url,
-    body: jsonEncode(body)
+    body: jsonEncode(body),
+    headers: headers
   );
+}
+
+Map<String, String> setAuthToken(String token){
+  return {
+    "Authorization": "Bearer " + token
+  };
 }
