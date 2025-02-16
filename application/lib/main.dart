@@ -43,7 +43,6 @@ class _HomeState extends State{
   }
 
   Widget loadHome() {
-    this.userStorage.clear();
     if(!this.userStorage.containsKey('email')){
       return Login();
     }

@@ -35,7 +35,7 @@ class Signup extends StatelessWidget {
               const SizedBox(height: 25),
 
               TCGTextField(
-                controller: usernameController,
+                controller: emailController,
                 hintText: 'Email',
               ),
 
