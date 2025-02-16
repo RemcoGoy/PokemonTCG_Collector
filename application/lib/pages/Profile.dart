@@ -1,3 +1,5 @@
+import 'package:application/components/Button.dart';
+import 'package:application/services/AuthService.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatelessWidget {
@@ -5,9 +7,19 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.person,
-      size: 150,
+    return SafeArea(
+      child: Column(
+        children: [
+          Icon(
+            Icons.person,
+            size: 150,
+          ),
+          TCGButton(
+            buttonText: 'Sign in',
+            onTap: () => logout(context),
+          ),
+        ]
+      ),
     );
   }
 }

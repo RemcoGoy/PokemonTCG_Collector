@@ -48,3 +48,10 @@ void signUserUp(String email, String password, String username, BuildContext con
     // Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
   }
 }
+
+void logout(BuildContext context){
+  final userStorage = Hive.box('userStorage');
+  userStorage.clear();
+
+  Navigator.push(context, MaterialPageRoute(builder: (context) => MainApp()));
+}
