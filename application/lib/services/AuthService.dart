@@ -31,8 +31,6 @@ void signUserUp(String email, String password, String username, BuildContext con
   if(email.isEmpty || password.isEmpty){
     print('password or email not given');
   }else{
-    final userStorage = Hive.box('userStorage');
-
     final response = await post('auth/signup', body: {
       "email": email,
       "password": password,
